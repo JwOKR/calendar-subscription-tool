@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const dayjs = require('dayjs');
 
 const outputDir = process.argv[2] || 'output';
 const repoOwner = process.argv[3] || process.env.GITHUB_REPOSITORY_OWNER || 'unknown';
