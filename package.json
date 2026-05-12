@@ -15,7 +15,10 @@
     "build:festivals": "node src/index.js --only festivals",
     "merge": "node src/index.js --merge",
     "set-api": "node -e \"require('./src/fetch-holidays').setCustomHolidayApi(process.argv[2]);\"",
-    "config": "cat config.json"
+    "config": "cat config.json",
+    "generate-index": "node src/generate-index.js output",
+    "vercel-build": "npm run build && npm run generate-index",
+    "vercel-dev": "vercel dev"
   },
   "keywords": [],
   "author": "",

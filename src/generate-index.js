@@ -124,75 +124,56 @@ const html = `<!DOCTYPE html>
         <div id="tab-customize" class="tab-content">
             <div class="guide-card">
                 <h2>⚙️ 定制我的日历</h2>
-                <p style="color:#666; margin-bottom:24px; line-height:1.6;">通过以下步骤，创建属于你自己的定制版日历订阅源：</p>
-
-                <div class="step">
-                    <div class="step-num">1</div>
-                    <div class="step-content">
-                        <h4>创建你的副本</h4>
-                        <p>点击下面的按钮，一键创建你的专属日历仓库（无需手动配置）</p>
-                        <a href="https://github.com/new?template=${repoFullName}" target="_blank" class="btn btn-primary" style="margin-top:8px;">🚀 创建我的日历副本</a>
+                <p style="color:#666; margin-bottom:24px; line-height:1.6;">填写以下配置，生成属于你的个性化日历订阅链接：</p>
+                
+                <!-- 配置表单 -->
+                <div style="background:#f8f9fa; padding:20px; border-radius:12px; margin-bottom:20px;">
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; color:#333; font-weight:600; margin-bottom:6px;">📡 自定义节假日 API（可选）</label>
+                        <input type="text" id="holidayApi" placeholder="例如：https://timor.tech/api/holiday/year/{year}" style="width:100%; padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
+                        <small style="color:#999; margin-top:4px; display:block;">留空使用默认 API。{year} 会被替换为年份。</small>
                     </div>
+                    
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; color:#333; font-weight:600; margin-bottom:8px;">📋 选择要包含的订阅源</label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="src-holidays" checked style="margin-right:8px;"> 🇨🇳 中国节假日（法定假日 + 调休）
+                        </label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="src-lunar" checked style="margin-right:8px;"> 🌙 农历日历
+                        </label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="src-solar" checked style="margin-right:8px;"> ☀️ 二十四节气
+                        </label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="src-yiji" style="margin-right:8px;"> 📋 宜忌日历
+                        </label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="src-festivals" checked style="margin-right:8px;"> 🎉 普通节日
+                        </label>
+                    </div>
+                    
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; color:#333; font-weight:600; margin-bottom:6px;">📅 年份范围</label>
+                        <input type="text" id="yearRange" value="${dayjs().year()}-${dayjs().year() + 2}" placeholder="例如：2024-2027" style="width:200px; padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
+                    </div>
+                    
+                    <button onclick="generateCustomSubscription()" class="btn btn-primary" style="width:100%;">🚀 生成我的订阅链接</button>
                 </div>
-
-                <div class="step">
-                    <div class="step-num">2</div>
-                    <div class="step-content">
-                        <h4>定制配置（可选）</h4>
-                        <p>在你的仓库中编辑 <code>config.json</code>，可以：</p>
-                        <ul>
-                            <li>修改节假日数据源（支持 timor.tech 格式或自定义 API）</li>
-                            <li>选择要合并的订阅源（all-in-one.ics 的内容）</li>
-                            <li>开启/关闭中国节日、国际节日、动态节日</li>
-                            <li>添加自定义节日</li>
-                        </ul>
-                        <div style="margin-top:12px;">
-                            <a href="https://github.com/${repoFullName}/edit/main/config.json" target="_blank" class="btn btn-secondary" style="margin-right:10px;">✏️ 在线编辑 config.json</a>
-                            <a href="#config-guide" onclick="document.getElementById('tab-customize').scrollTop=0;return false;" class="btn btn-secondary">📖 查看配置说明</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="step">
-                    <div class="step-num">3</div>
-                    <div class="step-content">
-                        <h4>启用自动更新</h4>
-                        <p>进入你的仓库 → <strong>Settings</strong> → <strong>Pages</strong> → Source 选择 <strong>GitHub Actions</strong></p>
-                        <p style="margin-top:8px;">然后进入 <strong>Actions</strong> 标签 → 选择 <strong>Generate & Deploy Calendar</strong> → <strong>Run workflow</strong></p>
-                    </div>
-                </div>
-
-                <div class="step">
-                    <div class="step-num">4</div>
-                    <div class="step-content">
-                        <h4>获取你的专属订阅链接</h4>
-                        <p>部署成功后，你的专属订阅链接为：</p>
-                        <div class="subscription-url" style="margin-top:8px;" onclick="copyToClipboard(this)">https://你的用户名.github.io/你的仓库名/all-in-one.ics</div>
-                        <p style="margin-top:12px; color:#999; font-size:13px;">💡 将 <code>all-in-one.ics</code> 替换为 <code>china-holidays.ics</code> 等可获取其他订阅源</p>
-                    </div>
+                
+                <!-- 生成的订阅链接 -->
+                <div id="custom-result" style="display:none; background:linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); padding:20px; border-radius:12px; border-left:5px solid #48bb78;">
+                    <h4 style="color:#2f855a; margin-bottom:10px;">✅ 你的个性化订阅链接已生成！</h4>
+                    <div class="subscription-url" id="custom-url" onclick="copyToClipboard(this)" style="margin-bottom:12px;"></div>
+                    <p style="color:#666; font-size:13px;">💡 将此链接添加到你的日历应用（iOS 日历、Google Calendar、Outlook 等）</p>
                 </div>
             </div>
-
-            <!-- 配置说明 -->
-            <div class="guide-card" id="config-guide-card">
-                <h2>📖 config.json 配置说明</h2>
-                <div class="config-preview"><span class="key">"holidayApi"</span>: <span class="string">"https://timor.tech/api/holiday/year/{{year}}"</span>,  <span class="comment">// 自定义节假日 API 地址</span>
-<span class="key">"holidayApiFormat"</span>: <span class="string">"timor"</span>,                        <span class="comment">// API 格式: "timor" 或 "simple"</span>
-<span class="key">"mergeSources"</span>: [                                      <span class="comment">// all-in-one.ics 合并的源</span>
-  <span class="string">"output/china-holidays.ics"</span>,
-  <span class="string">"output/lunar-calendar.ics"</span>,
-  <span class="string">"output/solar-terms.ics"</span>,
-  <span class="string">"output/festivals.ics"</span>
-],
-<span class="key">"festivals"</span>: {
-  <span class="key">"includeCN"</span>: <span class="boolean">true</span>,         <span class="comment">// 包含中国公历节日</span>
-  <span class="key">"includeIntl"</span>: <span class="boolean">true</span>,     <span class="comment">// 包含国际/西方节日</span>
-  <span class="key">"includeDynamic"</span>: <span class="boolean">true</span>,  <span class="comment">// 包含动态日期节日</span>
-  <span class="key">"custom"</span>: []                              <span class="comment">// 自定义节日</span>
-}</div>
-                <p style="color:#666; font-size:13px; margin-top:16px; line-height:1.6;">
-                    💡 <strong>提示</strong>：编辑完成后，GitHub Actions 会自动运行并更新你的订阅源。也可在 Actions 页面手动点击 <strong>Run workflow</strong> 立即触发。
-                </p>
+            
+            <!-- 高级选项：Fork 模板 -->
+            <div class="guide-card" style="margin-top:20px;">
+                <h2>🔧 高级选项：完整定制</h2>
+                <p style="color:#666; margin-bottom:16px; line-height:1.6;">如果你需要更完整的定制（修改节日列表、添加自定义节日等），可以 fork 此仓库：</p>
+                <a href="https://github.com/new?template=${repoFullName}" target="_blank" class="btn btn-secondary">🍴 Fork 此仓库</a>
             </div>
         </div>
 
@@ -223,6 +204,39 @@ const html = `<!DOCTYPE html>
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 2000);
             });
+        }
+        function generateCustomSubscription() {
+            const holidayApi = document.getElementById('holidayApi').value.trim();
+            const yearRange = document.getElementById('yearRange').value.trim();
+            
+            // 获取选中的订阅源
+            const sources = [];
+            if (document.getElementById('src-holidays').checked) sources.push('holidays');
+            if (document.getElementById('src-lunar').checked) sources.push('lunar');
+            if (document.getElementById('src-solar').checked) sources.push('solar');
+            if (document.getElementById('src-yiji').checked) sources.push('yiji');
+            if (document.getElementById('src-festivals').checked) sources.push('festivals');
+            
+            if (sources.length === 0) {
+                alert('请至少选择一个订阅源！');
+                return;
+            }
+            
+            // 构建 API URL
+            let apiUrl = '/api/calendar?sources=' + sources.join(',');
+            if (holidayApi) {
+                apiUrl += '&holidayApi=' + encodeURIComponent(holidayApi);
+            }
+            if (yearRange) {
+                apiUrl += '&year=' + encodeURIComponent(yearRange);
+            }
+            
+            // 显示结果
+            const resultDiv = document.getElementById('custom-result');
+            const urlDiv = document.getElementById('custom-url');
+            urlDiv.textContent = window.location.origin + apiUrl;
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>

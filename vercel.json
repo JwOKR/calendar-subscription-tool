@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "output/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/calendar", "dest": "/api/calendar.js" },
+    { "src": "/api/merge", "dest": "/api/merge.js" },
+    { "src": "/(.*\\.ics)", "dest": "/output/$1" },
+    { "src": "/(.*)", "dest": "/output/$1" }
+  ],
+  "env": {
+    "NODE_VERSION": "20.x"
+  }
+}
