@@ -23,6 +23,11 @@ const DATA_DIR = path.join(ROOT_DIR, 'data');
 // ===== 内存缓存（实例生命周期内有效）=====
 const memoryCache = new Map();
 
+// ===== 辅助：去除字符串中的 emoji =====
+function stripAllEmoji(str) {
+  return str.replace(/[\u{1F300}-\u{1F5FF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '').replace(/\s+/g, ' ').trim();
+}
+
 // ===== 延迟加载业务模块 =====
 let _lunarCalc, _festivals;
 
@@ -170,15 +175,19 @@ function parseSimpleFormat(data) {
 
 /**
  * 将节假日数据转为日历事件列表
+ * @param {Object} holidaysData
+ * @param {boolean} icons - 是否保留 emoji，默认 true
  */
-function flattenHolidays(holidaysData) {
+function flattenHolidays(holidaysData, icons = true) {
+  const prefix = icons ? '🎉 ' : '';
+  const workPrefix = icons ? '💼 ' : '';
   const events = [];
   for (const [, data] of Object.entries(holidaysData)) {
     for (const range of data.holidayRanges || []) {
       events.push({
         date: range.start,
         endDate: range.end,
-        summary: `🎉 ${range.name}（假期）`,
+        summary: `${prefix}${range.name}（假期）`,
         description: `${range.name}假期 ${range.start} ~ ${range.end}`,
         type: 'holiday',
         busy: 'free',
@@ -187,7 +196,7 @@ function flattenHolidays(holidaysData) {
     for (const wd of data.workdays || []) {
       events.push({
         date: wd.date,
-        summary: `💼 ${wd.name}`,
+        summary: `${workPrefix}${wd.name}`,
         description: '调休安排：需要上班',
         type: 'workday',
         busy: 'busy',
@@ -226,7 +235,7 @@ function addEvent(cal, ev) {
 
 // ===== 主生成逻辑 =====
 
-async function generateCalendar({ sources, holidayApi, year }) {
+async function generateCalendar({ sources, holidayApi, year, icons = true }) {
   const current = dayjs().year();
   let startYear, endYear;
 
@@ -255,7 +264,7 @@ async function generateCalendar({ sources, holidayApi, year }) {
         holidaysData[y] = await fetchYearHolidays(y, holidayApi || null);
       }
 
-      const events = flattenHolidays(holidaysData);
+      const events = flattenHolidays(holidaysData, icons);
       events.forEach(ev => addEvent(cal, ev));
       console.log(`[generate] 节假日事件：${events.length} 条`);
     } catch (e) {
@@ -267,17 +276,22 @@ async function generateCalendar({ sources, holidayApi, year }) {
   const { calcLunarEventsByYears } = getLunarCalc();
   const lunarData = calcLunarEventsByYears(startYear, endYear);
 
+  function processEvents(evList) {
+    if (!icons) evList.forEach(ev => { ev.summary = stripAllEmoji(ev.summary); });
+    evList.forEach(ev => addEvent(cal, ev));
+  }
+
   if (sources.includes('lunar') && lunarData.lunarEvents) {
     console.log(`[generate] 农历事件：${lunarData.lunarEvents.length} 条`);
-    lunarData.lunarEvents.forEach(ev => addEvent(cal, ev));
+    processEvents(lunarData.lunarEvents);
   }
   if (sources.includes('solar') && lunarData.solarTermEvents) {
     console.log(`[generate] 节气事件：${lunarData.solarTermEvents.length} 条`);
-    lunarData.solarTermEvents.forEach(ev => addEvent(cal, ev));
+    processEvents(lunarData.solarTermEvents);
   }
   if (sources.includes('yiji') && lunarData.yiJiEvents) {
     console.log(`[generate] 宜忌事件：${lunarData.yiJiEvents.length} 条`);
-    lunarData.yiJiEvents.forEach(ev => addEvent(cal, ev));
+    processEvents(lunarData.yiJiEvents);
   }
 
   // 3. 普通节日
@@ -286,6 +300,7 @@ async function generateCalendar({ sources, holidayApi, year }) {
     try {
       const { getFestivalEvents } = getFestivals();
       const events = getFestivalEvents(startYear, endYear);
+      if (!icons) events.forEach(ev => { ev.summary = stripAllEmoji(ev.summary); });
       events.forEach(ev => addEvent(cal, ev));
       console.log(`[generate] 节日事件：${events.length} 条`);
     } catch (e) {
@@ -308,7 +323,10 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { sources, holidayApi, year } = req.query;
+    const { sources, holidayApi, year, icons: iconsStr } = req.query;
+
+    // icons 参数：默认 true；显式传 false 才关闭
+    const icons = iconsStr !== 'false';
 
     const sourceList = sources
       ? sources.split(',').map(s => s.trim().toLowerCase())
@@ -321,12 +339,13 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: '至少需要一个有效的 sources 参数' });
     }
 
-    console.log(`[API] 请求：sources=${filtered.join(',')} year=${year || 'default'}`);
+    console.log(`[API] 请求：sources=${filtered.join(',')} year=${year || 'default'} icons=${icons}`);
 
     const icsContent = await generateCalendar({
       sources: filtered,
       holidayApi: holidayApi || null,
       year: year || null,
+      icons,
     });
 
     const filename = `calendar-${filtered.join('-')}.ics`;
