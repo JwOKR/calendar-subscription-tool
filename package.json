@@ -1,0 +1,31 @@
+{
+  "name": "calendar-subscription-tool",
+  "version": "1.0.0",
+  "description": "中国日历订阅源生成工具 - 节假日·调休·农历·节气·宜忌 → .ics 文件",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "build": "node src/index.js",
+    "serve": "node src/index.js --serve",
+    "build:all": "node src/index.js --years 2024-2027",
+    "build:holidays": "node src/index.js --only holidays",
+    "build:lunar": "node src/index.js --only lunar",
+    "build:solar": "node src/index.js --only solar-terms",
+    "build:yiji": "node src/index.js --only yiji",
+    "build:festivals": "node src/index.js --only festivals",
+    "merge": "node src/index.js --merge",
+    "set-api": "node -e \"require('./src/fetch-holidays').setCustomHolidayApi(process.argv[2]);\"",
+    "config": "cat config.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.16.0",
+    "dayjs": "^1.11.20",
+    "ical-generator": "^10.2.0",
+    "lunar-javascript": "^1.7.7",
+    "node-cron": "^4.2.1"
+  }
+}

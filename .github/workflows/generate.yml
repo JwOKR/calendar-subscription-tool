@@ -1,0 +1,164 @@
+name: Generate & Deploy Calendar
+
+on:
+  schedule:
+    # 每天北京时间凌晨2点运行 (UTC 18:00)
+    - cron: '0 18 * * *'
+  workflow_dispatch:  # 允许手动触发
+    inputs:
+      years:
+        description: '生成年份范围 (例如: 2024-2027)'
+        required: false
+        default: ''
+      force_generate:
+        description: '强制重新生成所有文件'
+        required: false
+        default: 'false'
+        type: boolean
+
+# 设置 GITHUB_TOKEN 的权限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 允许一个并发部署
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --production
+      
+      - name: Generate ICS files
+        run: |
+          echo "🏭 开始生成日历文件..."
+          if [ -n "${{ github.event.inputs.years }}" ]; then
+            node src/index.js --years ${{ github.event.inputs.years }}
+          else
+            node src/index.js
+          fi
+          echo "✅ 生成完成"
+          ls -lh output/
+      
+      - name: Generate index.html (with cache info)
+        env:
+          REPO_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          cat > output/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="zh-CN">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>📅 日历订阅源</title>
+              <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+                  .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+                  h1 { color: #667eea; margin-bottom: 10px; }
+                  .update-time { color: #999; font-size: 14px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
+                  .card { background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #667eea; transition: transform 0.2s; }
+                  .card:hover { transform: translateX(5px); }
+                  .card h3 { color: #333; margin-bottom: 8px; }
+                  .card p { color: #666; font-size: 14px; margin-bottom: 12px; }
+                  .subscription-url { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace; font-size: 13px; color: #667eea; word-break: break-all; cursor: pointer; transition: all 0.2s; }
+                  .subscription-url:hover { background: #f0f0f0; border-color: #667eea; }
+                  .badge { display: inline-block; background: #667eea; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 8px; }
+                  .footer { margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0; color: #999; font-size: 13px; text-align: center; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>📅 日历订阅源</h1>
+                  <div class="update-time">🕐 最后更新: TIMESTAMP_PLACEHOLDER</div>
+                  
+                  <div class="card">
+                      <h3>🇨🇳 中国节假日 <span class="badge">推荐</span></h3>
+                      <p>国务院办公厅发布的法定节假日 + 调休安排</p>
+                      <div class="subscription-url" onclick="copyToClipboard(this)">SUBSCRIPTION_BASE/china-holidays.ics</div>
+                  </div>
+                  
+                  <div class="card">
+                      <h3>🌙 农历日历</h3>
+                      <p>农历日期 + 传统节日（春节、中秋等）</p>
+                      <div class="subscription-url" onclick="copyToClipboard(this)">SUBSCRIPTION_BASE/lunar-calendar.ics</div>
+                  </div>
+                  
+                  <div class="card">
+                      <h3>☀️ 二十四节气</h3>
+                      <p>完整二十四节气，精准到分钟</p>
+                      <div class="subscription-url" onclick="copyToClipboard(this)">SUBSCRIPTION_BASE/solar-terms.ics</div>
+                  </div>
+                  
+                  <div class="card">
+                      <h3>📋 宜忌日历</h3>
+                      <p>每日宜忌 + 吉神凶煞（传统黄历）</p>
+                      <div class="subscription-url" onclick="copyToClipboard(this)">SUBSCRIPTION_BASE/yi-ji.ics</div>
+                  </div>
+                  
+                  <div class="card">
+                      <h3>🎉 普通节日</h3>
+                      <p>公历节日 + 国际节日 + 动态日期节日</p>
+                      <div class="subscription-url" onclick="copyToClipboard(this)">SUBSCRIPTION_BASE/festivals.ics</div>
+                  </div>
+                  
+                  <div class="card" style="border-left-color: #48bb78; background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);">
+                      <h3>🚀 全能日历 <span class="badge" style="background: #48bb78;">ALL-IN-ONE</span></h3>
+                      <p>合并所有日历源，一个订阅搞定所有</p>
+                      <div class="subscription-url" onclick="copyToClipboard(this)">SUBSCRIPTION_BASE/all-in-one.ics</div>
+                  </div>
+                  
+                  <div class="footer">
+                      <p>🤖 由 GitHub Actions 自动生成 | 每天凌晨2点自动更新</p>
+                      <p style="margin-top: 8px;">💡 点击订阅链接可复制 | 在 iOS/Android/Outlook 中直接添加订阅</p>
+                  </div>
+              </div>
+              
+              <script>
+                  function copyToClipboard(element) {
+                      const text = element.textContent;
+                      navigator.clipboard.writeText(text).then(() => {
+                          const original = element.textContent;
+                          element.textContent = '✅ 已复制!';
+                          setTimeout(() => { element.textContent = original; }, 2000);
+                      });
+                  }
+              </script>
+          </body>
+          </html>
+          EOF
+          # 替换占位符
+          sed -i "s|TIMESTAMP_PLACEHOLDER|${TIMESTAMP}|g" output/index.html
+          sed -i "s|SUBSCRIPTION_BASE|${REPO_URL}|g" output/index.html
+          echo "✅ index.html 已更新"
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./output
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

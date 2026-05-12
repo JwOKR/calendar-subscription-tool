@@ -1,0 +1,19 @@
+{
+  "holidayApi": "",
+  "holidayApiFormat": "timor",
+  "mergeSources": [
+    "output/china-holidays.ics",
+    "output/lunar-calendar.ics",
+    "output/solar-terms.ics",
+    "output/festivals.ics"
+  ],
+  "mergeOutput": "all-in-one.ics",
+  "mergeCalName": "全能日历",
+  "mergeCalDesc": "节假日+农历+节气+节日 合并订阅",
+  "festivals": {
+    "includeCN": true,
+    "includeIntl": true,
+    "includeDynamic": true,
+    "custom": []
+  }
+}
