@@ -51,8 +51,9 @@ function writeICS({ filename, calName, calDesc, events, color }) {
     };
 
     // 多日事件（节假日区间）
+    // ical-generator 的 end 是独占的，所以 +1 天
     if (ev.endDate) {
-      eventOpts.end = dayjs(ev.endDate).toDate();
+      eventOpts.end = dayjs(ev.endDate).add(1, 'day').toDate();
     }
 
     // 忙闲状态

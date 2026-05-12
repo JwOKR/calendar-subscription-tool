@@ -86,6 +86,8 @@ function parseTimorFormat(data) {
 
   const holidayObj = data.holiday || {};
   const entries = Object.entries(holidayObj);
+  // 修复：按日期排序，防止 API 返回顺序不对导致连续假期识别错误
+  entries.sort((a, b) => a[1].date.localeCompare(b[1].date));
 
   let i = 0;
   while (i < entries.length) {
@@ -98,14 +100,10 @@ function parseTimorFormat(data) {
       let rangeEnd = dateStr;
 
       let j = i + 1;
-      while (j < entries.length) {
-        const [nextMmdd, nextDetail] = entries[j];
-        if (nextDetail.holiday === true && nextDetail.name === name) {
-          rangeEnd = nextDetail.date;
-          j++;
-        } else {
-          break;
-        }
+      // 修复：只检查 holiday === true，不检查 name（防止同名但 name 细微差别导致区间截断）
+      while (j < entries.length && entries[j][1].holiday === true) {
+        rangeEnd = entries[j][1].date;
+        j++;
       }
 
       holidayRanges.push({
