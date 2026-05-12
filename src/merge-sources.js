@@ -83,10 +83,7 @@ async function mergeSources({ sources, output, calName = '合并日历', calDesc
         };
 
         if (dtEndMatch) {
-          // DTEND 是独占的，+1 天以包含结束当天
-          const endDate = parseDate(dtEndMatch[1]);
-          endDate.setDate(endDate.getDate() + 1);
-          eventOpts.end = endDate;
+          eventOpts.end = parseDate(dtEndMatch[1]);
         }
 
         cal.createEvent(eventOpts);
