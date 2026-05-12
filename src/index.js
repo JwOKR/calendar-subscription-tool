@@ -221,6 +221,18 @@ function startServer() {
   const OUTPUT_DIR = path.join(__dirname, '..', 'output');
 
   const server = http.createServer((req, res) => {
+    // CORS 预检请求处理
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Max-Age': '86400',
+      });
+      res.end();
+      return;
+    }
+
     let urlPath = req.url.split('?')[0];
     if (urlPath === '/') urlPath = '/index.html';
     const filePath = path.join(OUTPUT_DIR, urlPath);
@@ -249,7 +261,10 @@ function startServer() {
       const contentType = ext === '.ics' ? 'text/calendar; charset=utf-8'
                           : ext === '.txt' ? 'text/plain; charset=utf-8'
                           : 'text/html; charset=utf-8';
-      res.writeHead(200, { 'Content-Type': contentType });
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Access-Control-Allow-Origin': '*',
+      });
       res.end(data);
     });
   });

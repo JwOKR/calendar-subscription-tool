@@ -57,7 +57,8 @@ function calcLunarEvents(startDate, endDate) {
     // 2. 节气事件
     const jieQi = lunar.getJieQi();
     if (jieQi) {
-      const prevSolar = Solar.fromYmd(y, m, d - 1);
+      const prevDay = current.subtract(1, 'day');
+      const prevSolar = Solar.fromYmd(prevDay.year(), prevDay.month() + 1, prevDay.date());
       const prevLunar = prevSolar.getLunar();
       const prevJieQi = prevLunar.getJieQi();
       // 只在节气当天触发（前一天不是同一个节气）
