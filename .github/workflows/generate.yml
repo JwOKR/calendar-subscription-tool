@@ -79,8 +79,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 只提交 output/ 和 index.html（如果有变化）
-          git add output/ index.html 2>/dev/null || true
+          # 在 remote URL 中嵌入 GITHUB_TOKEN 以允许 push
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          
+          # 只提交 output/（含 index.html）
+          git add output/
           
           if git diff --staged --quiet; then
             echo "📋 没有文件变化，跳过提交"
