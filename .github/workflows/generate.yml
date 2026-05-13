@@ -62,6 +62,8 @@ jobs:
           else
             node src/index.js
           fi
+          echo "📦 合并生成 all-in-one.ics..."
+          node src/index.js --merge
           echo "✅ 生成完成"
           ls -lh output/
       
