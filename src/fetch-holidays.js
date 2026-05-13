@@ -65,7 +65,7 @@ function parseHolidayData(data, year) {
 
   if (data.holiday) {
     // timor.tech 格式
-    return parseTimorFormat(data);
+    return parseTimorFormat(data, year);
   } else if (data.holidays && Array.isArray(data.holidays)) {
     // 简化数组格式
     return parseSimpleFormat(data);
@@ -77,22 +77,38 @@ function parseHolidayData(data, year) {
 }
 
 /**
- * 解析 timor.tech 格式数据
+ * 修正日期字符串中的年份（处理 API 返回错误年份的情况）
+ * @param {string} dateStr - 原始日期，如 "2026-01-01"
+ * @param {number} expectedYear - 期望的年份，如 2027
+ * @returns {string} - 修正后的日期，如 "2027-01-01"
  */
-function parseTimorFormat(data) {
+function fixYear(dateStr, expectedYear) {
+  if (!dateStr || typeof dateStr !== 'string') return dateStr;
+  const yearPrefix = String(expectedYear);
+  if (dateStr.startsWith(yearPrefix)) return dateStr;
+  // 替换前4位年份
+  return yearPrefix + dateStr.slice(4);
+}
+
+/**
+ * 解析 timor.tech 格式数据
+ * @param {Object} data - API 返回的原始数据
+ * @param {number} year - 期望的年份（用于修正 API 可能返回的错误年份）
+ */
+function parseTimorFormat(data, year) {
   const holidayRanges = [];
   const workdays = [];
   const holidays = [];
 
   const holidayObj = data.holiday || {};
   const entries = Object.entries(holidayObj);
-  // 按日期排序
-  entries.sort((a, b) => a[1].date.localeCompare(b[1].date));
+  // 按日期排序（使用修正后的日期）
+  entries.sort((a, b) => fixYear(a[1].date, year).localeCompare(fixYear(b[1].date, year)));
 
   let i = 0;
   while (i < entries.length) {
     const [mmdd, detail] = entries[i];
-    const dateStr = detail.date;
+    const dateStr = fixYear(detail.date, year);
 
     if (detail.holiday === true) {
       const name = detail.name;
@@ -103,11 +119,12 @@ function parseTimorFormat(data) {
       let j = i + 1;
       // 合并日期连续的 holiday===true（不管 name/wage 是否相同）
       while (j < entries.length && entries[j][1].holiday === true) {
-        const nextDate = dayjs(entries[j][1].date);
+        const nextDateStr = fixYear(entries[j][1].date, year);
+        const nextDate = dayjs(nextDateStr);
         const currentEndDate = dayjs(rangeEnd);
         // 日期必须连续（下一天 = 当前结束日期 +1 天）
         if (nextDate.diff(currentEndDate.add(1, 'day'), 'day') === 0) {
-          rangeEnd = entries[j][1].date;
+          rangeEnd = nextDateStr;
           j++;
         } else {
           break;

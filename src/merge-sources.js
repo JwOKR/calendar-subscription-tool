@@ -58,6 +58,22 @@ async function mergeSources({ sources, output, calName = '合并日历', calDesc
   });
 
   let totalEvents = 0;
+  let skippedEvents = 0;
+
+  // 去重集合：key = "YYYYMMDD-核心词"
+  const seenEvents = new Set();
+
+  /**
+   * 提取事件核心词（去掉 emoji 和括号内容，用于去重）
+   * 例如："🎉 劳动节（假期）" → "劳动节"；"🛠 劳动节" → "劳动节"
+   */
+  function normalizeKeyword(summary) {
+    return summary
+      .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+      .replace(/[（(].*?[)）]/g, '')
+      .replace(/^[\s\p{Emoji_Presentation}]+/gu, '')
+      .trim();
+  }
 
   for (const source of sources) {
     console.log(`[合并] 读取源：${source}`);
@@ -75,9 +91,21 @@ async function mergeSources({ sources, output, calName = '合并日历', calDesc
 
         if (!dtStartMatch) continue;
 
+        // 去重检测：同一天 + 同一核心词（去掉 emoji 和括号）
+        const summary = summaryMatch ? summaryMatch[1] : '未命名事件';
+        const keyword = normalizeKeyword(summary);
+        const dedupKey = `${dtStartMatch[1]}-${keyword}`;
+
+        if (seenEvents.has(dedupKey)) {
+          console.log(`  ⚠ 跳过重复事件：${summary} (${dtStartMatch[1]})`);
+          skippedEvents++;
+          continue;
+        }
+        seenEvents.add(dedupKey);
+
         const eventOpts = {
           start: parseDate(dtStartMatch[1]),
-          summary: summaryMatch ? summaryMatch[1] : '未命名事件',
+          summary: summary,
           description: descMatch ? descMatch[1].replace(/\\n/g, '\n') : '',
           allDay: true,
         };
@@ -95,6 +123,8 @@ async function mergeSources({ sources, output, calName = '合并日历', calDesc
       console.error(`  ✗ 读取失败：${e.message}`);
     }
   }
+
+  console.log(`  📊 去重：跳过 ${skippedEvents} 个重复事件`);
 
   const outputPath = path.join(OUTPUT_DIR, output);
   fs.writeFileSync(outputPath, cal.toString(), 'utf-8');
