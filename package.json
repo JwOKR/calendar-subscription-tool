@@ -18,7 +18,10 @@
     "config": "cat config.json",
     "generate-index": "node src/generate-index.js output",
     "vercel-build": "npm run build && npm run generate-index",
-    "vercel-dev": "vercel dev"
+    "vercel-dev": "vercel dev",
+    "wrangler:dev": "wrangler dev",
+    "wrangler:deploy": "wrangler deploy",
+    "wrangler:tail": "wrangler tail"
   },
   "keywords": [],
   "author": "",
@@ -30,5 +33,8 @@
     "ical-generator": "^10.2.0",
     "lunar-javascript": "^1.7.7",
     "node-cron": "^4.2.1"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
   }
 }

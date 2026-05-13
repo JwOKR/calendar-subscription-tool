@@ -1,0 +1,26 @@
+name = "calendar-subscription-tool"
+main = "src/worker.js"
+compatibility_date = "2024-05-13"
+compatibility_flags = ["nodejs_compat"]
+
+# 可选：绑定自定义域名
+# routes = [
+#   { pattern = "calendar.yourdomain.com", zone_name = "yourdomain.com" }
+# ]
+
+# KV 存储（用于缓存节假日数据）
+# [[kv_namespaces]]
+# binding = "CALENDAR_CACHE"
+# id = "your-kv-namespace-id"
+
+[vars]
+# 可以在这里配置环境变量
+# HOLIDAY_API = "https://timor.tech/api/holiday/year"
+
+# 构建配置
+[build]
+command = "npm install"
+
+# 上传配置
+# [limits] 仅付费计划支持，免费计划请注释掉
+# cpu_ms = 5000
