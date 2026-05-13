@@ -86,7 +86,7 @@ function parseTimorFormat(data) {
 
   const holidayObj = data.holiday || {};
   const entries = Object.entries(holidayObj);
-  // 修复：按日期排序，防止 API 返回顺序不对导致连续假期识别错误
+  // 按日期排序
   entries.sort((a, b) => a[1].date.localeCompare(b[1].date));
 
   let i = 0;
@@ -98,21 +98,30 @@ function parseTimorFormat(data) {
       const name = detail.name;
       let rangeStart = dateStr;
       let rangeEnd = dateStr;
+      let currentWage = detail.wage || 1;
 
       let j = i + 1;
-      // 修复：只检查 holiday === true，不检查 name（防止同名但 name 细微差别导致区间截断）
+      // 合并日期连续的 holiday===true（不管 name/wage 是否相同）
       while (j < entries.length && entries[j][1].holiday === true) {
-        rangeEnd = entries[j][1].date;
-        j++;
+        const nextDate = dayjs(entries[j][1].date);
+        const currentEndDate = dayjs(rangeEnd);
+        // 日期必须连续（下一天 = 当前结束日期 +1 天）
+        if (nextDate.diff(currentEndDate.add(1, 'day'), 'day') === 0) {
+          rangeEnd = entries[j][1].date;
+          j++;
+        } else {
+          break;
+        }
       }
 
       holidayRanges.push({
         name,
         start: rangeStart,
         end: rangeEnd,
-        wage: detail.wage || 1,
+        wage: currentWage,
       });
 
+      // 生成每日事件
       let d = dayjs(rangeStart);
       const end = dayjs(rangeEnd);
       while (d.isSame(end) || d.isBefore(end)) {
@@ -204,9 +213,35 @@ function parseSimpleFormat(data) {
  */
 async function fetchYearHolidays(year) {
   const apiBase = getHolidayApiBase();
-  const url = apiBase.replace('{year}', year);
-  const resp = await axios.get(url, AXios_CONFIG);
-  const data = resp.data;
+  const url = apiBase.replace("{year}", year);
+
+  let data;
+  let lastErr;
+
+  // 重试 3 次
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const resp = await axios.get(url, AXios_CONFIG);
+      data = resp.data;
+      break;
+    } catch (e) {
+      lastErr = e;
+      console.log(`  [重试 ${attempt}/3] ${e.message}`);
+      if (attempt < 3) await new Promise(r => setTimeout(r, 2000 * attempt));
+    }
+  }
+
+  // axios 全部失败，尝试 curl 绕过 Cloudflare
+  if (!data) {
+    console.log('  [备用] 尝试 curl 抓取...');
+    try {
+      const { execSync } = require("child_process");
+      const curlRaw = execSync(`curl -s "${url}" -H "User-Agent: Mozilla/5.0"`, { timeout: 15000 }).toString();
+      data = JSON.parse(curlRaw);
+    } catch (e2) {
+      throw lastErr || e2;
+    }
+  }
 
   return parseHolidayData(data, year);
 }
