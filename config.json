@@ -1,6 +1,7 @@
 {
   "holidayApi": "",
   "holidayApiFormat": "timor",
+  "stripEmoji": true,
   "mergeSources": [
     "output/china-holidays.ics",
     "output/lunar-calendar.ics",

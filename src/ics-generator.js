@@ -11,6 +11,19 @@ const dayjs = require('dayjs');
 const OUTPUT_DIR = path.join(__dirname, '..', 'output');
 
 /**
+ * 去除字符串中的 emoji 图标
+ * @param {string} str
+ * @returns {string}
+ */
+function removeEmoji(str) {
+  if (!str) return str;
+  return str
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F910}-\u{1F96B}\u{1F980}-\u{1F9E0}]/gu, '')
+    .replace(/[\u{2300}-\u{23FF}\u{2B50}\u{2B55}\u{2934}\u{2935}\u{2B05}\u{2B06}\u{2B07}\u{2B1B}\u{2B1C}\u{3297}\u{3299}\u{200D}\u{FE0F}\u{20E3}\u{E0020}-\u{E007F}]/gu, '')
+    .trim();
+}
+
+/**
  * 确保输出目录存在
  */
 function ensureOutputDir() {
@@ -27,9 +40,13 @@ function ensureOutputDir() {
  * @param {string}   opts.calDesc   - 日历描述
  * @param {Array}    opts.events    - 事件列表
  * @param {string}   [opts.color]   - 日历颜色（X-APPLE-CALENDAR-COLOR）
+ * @param {boolean}  [opts.stripEmoji] - 是否去除事件名称中的 emoji（默认 true）
  */
-function writeICS({ filename, calName, calDesc, events, color }) {
+function writeICS({ filename, calName, calDesc, events, color, stripEmoji }) {
   ensureOutputDir();
+
+  // 默认去除 emoji
+  const shouldStrip = stripEmoji !== false;
 
   const cal = new ICalCalendar({
     name: calName,
@@ -43,9 +60,12 @@ function writeICS({ filename, calName, calDesc, events, color }) {
   }
 
   for (const ev of events) {
+    const rawSummary = ev.summary || '';
+    const summary = shouldStrip ? removeEmoji(rawSummary) : rawSummary;
+
     const eventOpts = {
       start: dayjs(ev.date).toDate(),
-      summary: ev.summary,
+      summary: summary,
       description: ev.description || '',
       allDay: true,
     };
@@ -80,6 +100,19 @@ function writeICS({ filename, calName, calDesc, events, color }) {
 function generateAllICS(allData) {
   const files = [];
 
+  // 从 config.json 读取 stripEmoji 配置（默认 true）
+  let shouldStripEmoji = true;
+  try {
+    const configPath = path.join(__dirname, '..', 'config.json');
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    if (typeof config.stripEmoji === 'boolean') {
+      shouldStripEmoji = config.stripEmoji;
+    }
+  } catch (e) {
+    // 配置读取失败，使用默认 true
+  }
+  const stripOpt = shouldStripEmoji;
+
   // 1. 节假日 + 调休
   if (allData.holidayEvents && allData.holidayEvents.length > 0) {
     files.push(writeICS({
@@ -88,6 +121,7 @@ function generateAllICS(allData) {
       calDesc: '中国法定节假日与调休安排（数据源：timor.tech）',
       events: allData.holidayEvents,
       color: '#E74C3C',
+      stripEmoji: stripOpt,
     }));
   }
 
@@ -99,6 +133,7 @@ function generateAllICS(allData) {
       calDesc: '农历初一及农历节日提醒（本地计算）',
       events: allData.lunarEvents,
       color: '#8E44AD',
+      stripEmoji: stripOpt,
     }));
   }
 
@@ -110,6 +145,7 @@ function generateAllICS(allData) {
       calDesc: '中国二十四节气（本地计算）',
       events: allData.solarTermEvents,
       color: '#27AE60',
+      stripEmoji: stripOpt,
     }));
   }
 
@@ -121,6 +157,7 @@ function generateAllICS(allData) {
       calDesc: '老黄历每日宜忌（本地计算）',
       events: allData.yiJiEvents,
       color: '#F39C12',
+      stripEmoji: stripOpt,
     }));
   }
 
@@ -132,6 +169,7 @@ function generateAllICS(allData) {
       calDesc: '中国公历节日、国际节日及动态日期节日（本地计算）',
       events: allData.festivalEvents,
       color: '#E67E22',
+      stripEmoji: stripOpt,
     }));
   }
 
