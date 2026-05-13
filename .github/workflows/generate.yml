@@ -20,7 +20,7 @@ on:
 
 # 设置 GITHUB_TOKEN 的权限
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -41,6 +41,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -69,7 +72,23 @@ jobs:
         run: |
           TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
           node src/generate-index.js output "${GITHUB_REPOSITORY_OWNER}" "${GITHUB_REPOSITORY_NAME}" "${TIMESTAMP}"
-          echo "✅ index.html 已更新（含定制功能）"
+          echo "✅ index.html 已更新"
+      
+      - name: Commit and push generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 只提交 output/ 和 index.html（如果有变化）
+          git add output/ index.html 2>/dev/null || true
+          
+          if git diff --staged --quiet; then
+            echo "📋 没有文件变化，跳过提交"
+          else
+            git commit -m "chore: 自动更新生成的日历文件 [skip ci]"
+            git push origin main
+            echo "✅ 文件已推送回仓库"
+          fi
       
       - name: Setup Pages
         uses: actions/configure-pages@v5
