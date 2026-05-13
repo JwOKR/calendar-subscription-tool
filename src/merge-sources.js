@@ -91,10 +91,11 @@ async function mergeSources({ sources, output, calName = '合并日历', calDesc
 
         if (!dtStartMatch) continue;
 
-        // 去重检测：同一天 + 同一核心词（去掉 emoji 和括号）
+        // 去重检测：同一天 + 同一核心词 + 描述前缀
         const summary = summaryMatch ? summaryMatch[1] : '未命名事件';
         const keyword = normalizeKeyword(summary);
-        const dedupKey = `${dtStartMatch[1]}-${keyword}`;
+        const descPrefix = descMatch ? descMatch[1].replace(/\\n/g, '').slice(0, 30) : '';
+        const dedupKey = `${dtStartMatch[1]}-${keyword}-${descPrefix}`;
 
         if (seenEvents.has(dedupKey)) {
           console.log(`  ⚠ 跳过重复事件：${summary} (${dtStartMatch[1]})`);

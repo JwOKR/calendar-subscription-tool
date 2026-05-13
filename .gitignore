@@ -24,4 +24,5 @@ tmp/
 temp/
 .cache/
 
-.vercel
+# 缓存目录
+data/

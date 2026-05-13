@@ -33,10 +33,13 @@ function calcLunarEvents(startDate, endDate) {
     // 1. 农历日期事件（每月初一显示农历月份）
     const lunarDay = lunar.getDay();
     if (lunarDay === 1) {
+      // 检测闰月：lunar-javascript 中闰月的 getMonth() 返回负值
+      const isLeap = lunar.getMonth() < 0;
+      const monthLabel = isLeap ? `闰${lunar.getMonthInChinese()}` : lunar.getMonthInChinese();
       lunarEvents.push({
         date: dateStr,
-        summary: `🌙 农历${lunar.getMonthInChinese()}月`,
-        description: `农历${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}（${lunar.getYearInChinese()}年）`,
+        summary: `🌙 农历${monthLabel}月`,
+        description: `农历${monthLabel}月${lunar.getDayInChinese()}（${lunar.getYearInChinese()}年）${isLeap ? '【闰月】' : ''}`,
         type: 'lunar-month',
       });
     }
@@ -52,6 +55,60 @@ function calcLunarEvents(startDate, endDate) {
           type: 'lunar-festival',
         });
       }
+    }
+
+    // 补充农历节日（库未覆盖或需单独标注的）
+    const lm = lunar.getMonth();
+    const ld = lunar.getDay();
+
+    // 龙抬头（二月初二）
+    if (lm === 2 && ld === 2) {
+      lunarEvents.push({
+        date: dateStr,
+        summary: '龙抬头',
+        description: '农历二月初二，春龙节',
+        type: 'lunar-festival',
+      });
+    }
+
+    // 七夕（七月初七）
+    if (lm === 7 && ld === 7) {
+      lunarEvents.push({
+        date: dateStr,
+        summary: '七夕',
+        description: '农历七月初七，乞巧节',
+        type: 'lunar-festival',
+      });
+    }
+
+    // 重阳节（九月初九）
+    if (lm === 9 && ld === 9) {
+      lunarEvents.push({
+        date: dateStr,
+        summary: '重阳节',
+        description: '农历九月初九，登高节',
+        type: 'lunar-festival',
+      });
+    }
+
+    // 腊八节（腊月初八）
+    if (lm === 12 && ld === 8) {
+      lunarEvents.push({
+        date: dateStr,
+        summary: '腊八节',
+        description: '农历腊月初八',
+        type: 'lunar-festival',
+      });
+    }
+
+    // 小年（腊月二十三/二十四）
+    if (lm === 12 && (ld === 23 || ld === 24)) {
+      lunarEvents.push({
+        date: dateStr,
+        summary: '小年',
+        description: `农历腊月${ld}，${ld === 23 ? '北方' : '南方'}小年，祭灶节`,
+        type: 'lunar-festival',
+      });
     }
 
     // 2. 节气事件
@@ -80,7 +137,7 @@ function calcLunarEvents(startDate, endDate) {
     yiJiEvents.push({
       date: dateStr,
       summary: `📅 宜忌 · ${lunar.getDayInChinese()}`,
-      description: `宜：${yiStr || '无'}\n忌：${jiStr || '无'}\n农历${lunar.getYearInChinese()}年${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`,
+      description: `宜：${yiStr || '无'}\n忌：${jiStr || '无'}\n农历${lunar.getYearInChinese()}年${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}\n天干地支：${lunar.getYearInGanZhi()}年 ${lunar.getMonthInGanZhi()}月 ${lunar.getDayInGanZhi()}日`,
       type: 'yiji',
     });
 

@@ -27,7 +27,7 @@ function parseArgs() {
   const args = process.argv.slice(2);
   const config = {
     startYear: CURRENT_YEAR,
-    endYear: CURRENT_YEAR + 2,
+    endYear: CURRENT_YEAR + 10,
     only: null,
     serve: false,
     setApi: null,
@@ -77,6 +77,33 @@ function parseArgs() {
   return config;
 }
 
+/**
+ * 校验命令行参数
+ */
+function validateArgs(config) {
+  const VALID_ONLY = ['holidays', 'lunar', 'solar-terms', 'yiji', 'festivals'];
+
+  if (config.startYear > config.endYear) {
+    console.error('错误：起始年份不能大于结束年份');
+    process.exit(1);
+  }
+
+  if (config.startYear < 1900 || config.startYear > 2100) {
+    console.error(`错误：起始年份 ${config.startYear} 超出合理范围（1900-2100）`);
+    process.exit(1);
+  }
+  if (config.endYear < 1900 || config.endYear > 2100) {
+    console.error(`错误：结束年份 ${config.endYear} 超出合理范围（1900-2100）`);
+    process.exit(1);
+  }
+
+  if (config.only && !VALID_ONLY.includes(config.only)) {
+    console.error(`错误：未知的事件类型 "${config.only}"`);
+    console.error(`  允许的值：${VALID_ONLY.join(', ')}`);
+    process.exit(1);
+  }
+}
+
 function printHelp() {
   console.log(`
 用法：
@@ -114,6 +141,7 @@ function printHelp() {
  */
 async function main() {
   const config = parseArgs();
+  validateArgs(config);
 
   // 处理 --set-api
   if (config.setApi) {

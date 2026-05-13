@@ -83,7 +83,26 @@ function writeICS({ filename, calName, calDesc, events, color, stripEmoji }) {
       eventOpts.busyStatus = 'BUSY';
     }
 
-    cal.createEvent(eventOpts);
+    const createdEvent = cal.createEvent(eventOpts);
+
+    // 添加闹钟提醒（节假日、补班、农历节日、节气、普通节日）
+    if (ev.type && ['holiday', 'workday', 'lunar-festival', 'solar-term', 'festival'].includes(ev.type)) {
+      if (ev.type === 'solar-term') {
+        // 节气：当天早上 8 点提醒
+        const alarmTime = dayjs(ev.date).hour(8).minute(0).toDate();
+        createdEvent.createAlarm({
+          type: 'display',
+          trigger: alarmTime,
+        });
+      } else {
+        // 其他：提前 1 天早上 8 点提醒
+        const alarmTime = dayjs(ev.date).subtract(1, 'day').hour(8).minute(0).toDate();
+        createdEvent.createAlarm({
+          type: 'display',
+          trigger: alarmTime,
+        });
+      }
+    }
   }
 
   const filePath = path.join(OUTPUT_DIR, filename);
