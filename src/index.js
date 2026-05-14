@@ -26,8 +26,8 @@ const CURRENT_YEAR = dayjs().year();
 function parseArgs() {
   const args = process.argv.slice(2);
   const config = {
-    startYear: CURRENT_YEAR,
-    endYear: CURRENT_YEAR + 10,
+    startYear: CURRENT_YEAR - 5,
+    endYear: CURRENT_YEAR + 2,
     only: null,
     serve: false,
     setApi: null,
