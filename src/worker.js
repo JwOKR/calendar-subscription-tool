@@ -274,7 +274,7 @@ async function generateCalendar({ sources, holidayApi, year, icons = true }) {
       startYear = endYear = Number(year);
     }
   } else {
-    startYear = current;
+    startYear = current - 5;
     endYear = current + 2;
   }
 
