@@ -413,6 +413,15 @@ function renderHTML(origin) {
 
         <!-- 订阅标签页 -->
         <div id="tab-subscribe" class="tab-content active">
+            <div style="background:white; border-radius:12px; padding:14px 20px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                <span style="color:#333; font-weight:600; font-size:15px;">🎨 事件名称显示图标</span>
+                <label style="position:relative; display:inline-block; width:48px; height:26px; cursor:pointer;">
+                    <input type="checkbox" id="globalIconsToggle" checked style="opacity:0; width:0; height:0;" onchange="toggleIcons()">
+                    <span style="position:absolute; inset:0; background:#ccc; border-radius:26px; transition:0.3s;"></span>
+                    <span id="toggleDot" style="position:absolute; left:3px; top:3px; width:20px; height:20px; background:white; border-radius:50%; transition:0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.2); transform:translateX(22px);"></span>
+                </label>
+            </div>
+
             <div class="section-title">🇨🇳 中国节假日 <span class="badge">推荐</span></div>
             <div class="card">
                 <h3>🇨🇳 中国节假日</h3>
@@ -550,6 +559,41 @@ function renderHTML(origin) {
     <div class="copy-toast" id="copyToast">✅ 已复制到剪贴板！</div>
 
     <script>
+        const BASE_API = '${repoUrl}';
+        const SUBSCRIBE_URLS = [
+            { sources: 'holidays' },
+            { sources: 'lunar' },
+            { sources: 'solar' },
+            { sources: 'yiji' },
+            { sources: 'festivals' },
+            { sources: 'holidays,lunar,solar,festivals' },
+        ];
+
+        function toggleIcons() {
+            const checked = document.getElementById('globalIconsToggle').checked;
+            const dot = document.getElementById('toggleDot');
+            const track = dot.previousElementSibling;
+            if (checked) {
+                dot.style.transform = 'translateX(22px)';
+                track.style.background = '#667eea';
+            } else {
+                dot.style.transform = 'translateX(0)';
+                track.style.background = '#ccc';
+            }
+            updateSubscribeUrls(checked);
+        }
+
+        function updateSubscribeUrls(showIcons) {
+            const urls = document.querySelectorAll('#tab-subscribe .subscription-url');
+            urls.forEach((el, i) => {
+                if (i < SUBSCRIBE_URLS.length) {
+                    let url = BASE_API + '?sources=' + SUBSCRIBE_URLS[i].sources;
+                    if (!showIcons) url += '&icons=false';
+                    el.textContent = url;
+                }
+            });
+        }
+
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -572,6 +616,8 @@ function renderHTML(origin) {
                 setTimeout(() => toast.classList.remove('show'), 2000);
             });
         }
+        // 初始化：开关默认开启（蓝色）
+        document.getElementById('globalIconsToggle').nextElementSibling.style.background = '#667eea';
         function generateCustomSubscription() {
             const holidayApi = document.getElementById('holidayApi').value.trim();
             const yearRange = document.getElementById('yearRange').value.trim();
