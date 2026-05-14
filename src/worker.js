@@ -487,6 +487,16 @@ function renderHTML(origin) {
                         <label style="display:block; color:#333; font-weight:600; margin-bottom:6px;">📅 年份范围</label>
                         <input type="text" id="yearRange" value="2024-2027" placeholder="例如：2024-2027" style="width:200px; padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
                     </div>
+
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; color:#333; font-weight:600; margin-bottom:8px;">🎨 显示图标</label>
+                        <label style="display:inline-flex; align-items:center; cursor:pointer; margin-right:20px;">
+                            <input type="radio" name="icons" value="true" checked style="margin-right:6px;"> 显示 emoji 图标（🎉 元旦（假期））
+                        </label>
+                        <label style="display:inline-flex; align-items:center; cursor:pointer;">
+                            <input type="radio" name="icons" value="false" style="margin-right:6px;"> 不显示图标（元旦（假期））
+                        </label>
+                    </div>
                     
                     <button onclick="generateCustomSubscription()" class="btn btn-primary" style="width:100%;">🚀 生成我的订阅链接</button>
                 </div>
@@ -586,6 +596,9 @@ function renderHTML(origin) {
             }
             if (yearRange) {
                 apiUrl += '&year=' + encodeURIComponent(yearRange);
+            }
+            if (document.querySelector('input[name="icons"]:checked').value === 'false') {
+                apiUrl += '&icons=false';
             }
             
             // 显示结果
