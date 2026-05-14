@@ -189,3 +189,5 @@ function getFestivalEvents(startYear, endYear, options = {}) {
 }
 
 module.exports = { getFestivalEvents, FIXED_FESTIVALS, getDynamicFestivals, nthWeekday, easter, thanksgiving };
+
+module.exports = { getFestivalEvents, FIXED_FESTIVALS, getDynamicFestivals, nthWeekday, easter, thanksgiving };

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "中国日历订阅源生成工具 - 节假日·调休·农历·节气·宜忌 → .ics 文件",
   "main": "src/index.js",
+  "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "build": "node src/index.js",
