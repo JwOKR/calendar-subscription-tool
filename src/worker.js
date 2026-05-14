@@ -106,8 +106,15 @@ function parseTimorFormat(data) {
 
       let j = i + 1;
       while (j < entries.length && entries[j][1].holiday === true) {
-        rangeEnd = entries[j][1].date;
-        j++;
+        const nextDate = dayjs(entries[j][1].date);
+        const currentEndDate = dayjs(rangeEnd);
+        // 日期必须连续（下一天 = 当前结束日期 +1 天）才合并
+        if (nextDate.diff(currentEndDate.add(1, 'day'), 'day') === 0) {
+          rangeEnd = entries[j][1].date;
+          j++;
+        } else {
+          break;
+        }
       }
 
       holidayRanges.push({ name, start: detail.date, end: rangeEnd, wage: detail.wage || 1 });
