@@ -345,6 +345,55 @@ async function generateCalendar({ sources, holidayApi, year, icons = true }) {
   return cal.toString();
 }
 
+// ===== GitHub Pages 静态文件代理（标准请求走静态文件，更可靠）=====
+
+const GITHUB_PAGES_BASE = 'https://jwokr.github.io/calendar-subscription-tool/';
+
+// 标准 sources 组合 → 静态文件名映射
+const STATIC_FILE_MAP = {
+  'holidays': 'china-holidays',
+  'lunar': 'lunar-calendar',
+  'solar': 'solar-terms',
+  'yiji': 'yi-ji',
+  'festivals': 'festivals',
+  'holidays,lunar,solar,festivals': 'all-in-one',
+};
+
+/**
+ * 尝试从 GitHub Pages 获取静态 ICS 文件
+ * 仅适用于标准请求（无自定义 year/holidayApi）
+ * @returns {Promise<string|null>}
+ */
+async function fetchStaticICS(sourcesKey, icons) {
+  const baseName = STATIC_FILE_MAP[sourcesKey];
+  if (!baseName) return null;
+
+  const suffix = icons ? '' : '-noicon';
+  const url = `${GITHUB_PAGES_BASE}${baseName}${suffix}.ics`;
+
+  console.log(`[静态代理] 请求：${url}`);
+  try {
+    const resp = await fetch(url, {
+      headers: { 'User-Agent': 'CalendarTool/1.0' },
+    });
+    if (!resp.ok) {
+      console.log(`[静态代理] 失败：HTTP ${resp.status}`);
+      return null;
+    }
+    const text = await resp.text();
+    // 简单校验：确保是有效的 ICS
+    if (!text.includes('BEGIN:VCALENDAR')) {
+      console.log('[静态代理] 返回内容非 ICS');
+      return null;
+    }
+    console.log(`[静态代理] 成功，${text.length} 字节`);
+    return text;
+  } catch (e) {
+    console.log(`[静态代理] 异常：${e.message}`);
+    return null;
+  }
+}
+
 // ===== Cloudflare Workers Handler =====
 
 /**
@@ -720,12 +769,27 @@ export default {
 
       console.log(`[API] 请求：sources=${filtered.join(',')} year=${year || 'default'} icons=${icons}`);
 
-      const icsContent = await generateCalendar({
-        sources: filtered,
-        holidayApi: holidayApi || null,
-        year: year || null,
-        icons,
-      });
+      // 判断是否为标准请求（无自定义 year/holidayApi），优先走静态文件代理
+      const sourcesKey = filtered.join(',');
+      const isStandardRequest = !year && !holidayApi;
+      let icsContent = null;
+
+      if (isStandardRequest) {
+        icsContent = await fetchStaticICS(sourcesKey, icons);
+      }
+
+      // 静态代理失败或非标准请求，走动态生成
+      if (!icsContent) {
+        if (isStandardRequest) {
+          console.log('[API] 静态代理未命中，回退动态生成...');
+        }
+        icsContent = await generateCalendar({
+          sources: filtered,
+          holidayApi: holidayApi || null,
+          year: year || null,
+          icons,
+        });
+      }
 
       const filename = `calendar-${filtered.join('-')}.ics`;
       const headers = {
