@@ -59,7 +59,7 @@ async function fetchYearHolidays(year, apiBase) {
     return memoryCache.get(cacheKey);
   }
 
-  const url = (apiBase || 'https://timor.tech/api/holiday/year').replace('{year}', year);
+  const url = (apiBase || 'https://timor.tech/api/holiday/year/{year}').replace('{year}', year);
   console.log(`[fetch] 抓取 ${year} 节假日：${url}`);
 
   try {

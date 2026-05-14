@@ -18,7 +18,7 @@ const DATA_DIR = path.join(__dirname, '..', 'data');
 const CACHE_FILE = path.join(DATA_DIR, 'holidays-cache.json');
 const CONFIG_FILE = path.join(__dirname, '..', 'config.json');
 
-const DEFAULT_API_BASE = 'https://timor.tech/api/holiday/year';
+const DEFAULT_API_BASE = 'https://timor.tech/api/holiday/year/{year}';
 
 const AXios_CONFIG = {
   timeout: 15000,

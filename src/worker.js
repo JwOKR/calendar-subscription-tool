@@ -50,7 +50,7 @@ async function fetchYearHolidays(year, apiBase) {
     return memoryCache.get(cacheKey);
   }
 
-  const url = (apiBase || 'https://timor.tech/api/holiday/year').replace('{year}', year);
+  const url = (apiBase || 'https://timor.tech/api/holiday/year/{year}').replace('{year}', year);
   console.log(`[fetch] 抓取 ${year} 节假日：${url}`);
 
   try {
@@ -460,7 +460,7 @@ function renderHTML(origin) {
                 <div style="background:#f8f9fa; padding:20px; border-radius:12px; margin-bottom:20px;">
                     <div style="margin-bottom:16px;">
                         <label style="display:block; color:#333; font-weight:600; margin-bottom:6px;">📡 自定义节假日 API（可选）</label>
-                        <input type="text" id="holidayApi" placeholder="例如：https://timor.tech/api/holiday/year/{year}" style="width:100%; padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
+                        <input type="text" id="holidayApi" placeholder="例如：https://timor.tech/api/holiday/year/{year}" value="https://timor.tech/api/holiday/year/{year}" style="width:100%; padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
                         <small style="color:#999; margin-top:4px; display:block;">留空使用默认 API。{year} 会被替换为年份。</small>
                     </div>
                     
