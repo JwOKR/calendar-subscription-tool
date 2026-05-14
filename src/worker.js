@@ -359,6 +359,7 @@ function renderHTML(origin) {
         <!-- 标签栏 -->
         <div class="tab-bar">
             <div class="tab active" onclick="switchTab('subscribe')">📡 订阅日历</div>
+            <div class="tab" onclick="switchTab('customize')">⚙️ 定制我的日历</div>
             <div class="tab" onclick="switchTab('guide')">📱 使用教程</div>
         </div>
 
@@ -398,6 +399,56 @@ function renderHTML(origin) {
                 <h3>🚀 全能日历 <span class="badge" style="background:#48bb78;">ALL-IN-ONE</span></h3>
                 <p>合并所有日历源，一个订阅搞定所有</p>
                 <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}?sources=holidays,lunar,solar,festivals</div>
+            </div>
+        </div>
+
+        <!-- 定制标签页 -->
+        <div id="tab-customize" class="tab-content">
+            <div class="guide-card">
+                <h2>⚙️ 定制我的日历</h2>
+                <p style="color:#666; margin-bottom:24px; line-height:1.6;">填写以下配置，生成属于你的个性化日历订阅链接：</p>
+                
+                <!-- 配置表单 -->
+                <div style="background:#f8f9fa; padding:20px; border-radius:12px; margin-bottom:20px;">
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; color:#333; font-weight:600; margin-bottom:6px;">📡 自定义节假日 API（可选）</label>
+                        <input type="text" id="holidayApi" placeholder="例如：https://timor.tech/api/holiday/year/{year}" style="width:100%; padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
+                        <small style="color:#999; margin-top:4px; display:block;">留空使用默认 API。{year} 会被替换为年份。</small>
+                    </div>
+                    
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; color:#333; font-weight:600; margin-bottom:8px;">📋 选择要包含的订阅源</label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="src-holidays" checked style="margin-right:8px;"> 🇨🇳 中国节假日（法定假日 + 调休）
+                        </label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="src-lunar" checked style="margin-right:8px;"> 🌙 农历日历
+                        </label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="src-solar" checked style="margin-right:8px;"> ☀️ 二十四节气
+                        </label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="src-yiji" style="margin-right:8px;"> 📋 宜忌日历
+                        </label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="src-festivals" checked style="margin-right:8px;"> 🎉 普通节日
+                        </label>
+                    </div>
+                    
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; color:#333; font-weight:600; margin-bottom:6px;">📅 年份范围</label>
+                        <input type="text" id="yearRange" value="2024-2027" placeholder="例如：2024-2027" style="width:200px; padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
+                    </div>
+                    
+                    <button onclick="generateCustomSubscription()" class="btn btn-primary" style="width:100%;">🚀 生成我的订阅链接</button>
+                </div>
+                
+                <!-- 生成的订阅链接 -->
+                <div id="custom-result" style="display:none; background:linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); padding:20px; border-radius:12px; border-left:5px solid #48bb78;">
+                    <h4 style="color:#2f855a; margin-bottom:10px;">✅ 你的个性化订阅链接已生成！</h4>
+                    <div class="subscription-url" id="custom-url" onclick="copyToClipboard(this)" style="margin-bottom:12px;"></div>
+                    <p style="color:#666; font-size:13px;">💡 将此链接添加到你的日历应用（iOS 日历、Google Calendar、Outlook 等）</p>
+                </div>
             </div>
         </div>
 
@@ -447,8 +498,11 @@ function renderHTML(origin) {
             if (tabName === 'subscribe') {
                 document.querySelectorAll('.tab')[0].classList.add('active');
                 document.getElementById('tab-subscribe').classList.add('active');
-            } else {
+            } else if (tabName === 'customize') {
                 document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('tab-customize').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[2].classList.add('active');
                 document.getElementById('tab-guide').classList.add('active');
             }
         }
@@ -459,6 +513,39 @@ function renderHTML(origin) {
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 2000);
             });
+        }
+        function generateCustomSubscription() {
+            const holidayApi = document.getElementById('holidayApi').value.trim();
+            const yearRange = document.getElementById('yearRange').value.trim();
+            
+            // 获取选中的订阅源
+            const sources = [];
+            if (document.getElementById('src-holidays').checked) sources.push('holidays');
+            if (document.getElementById('src-lunar').checked) sources.push('lunar');
+            if (document.getElementById('src-solar').checked) sources.push('solar');
+            if (document.getElementById('src-yiji').checked) sources.push('yiji');
+            if (document.getElementById('src-festivals').checked) sources.push('festivals');
+            
+            if (sources.length === 0) {
+                alert('请至少选择一个订阅源！');
+                return;
+            }
+            
+            // 构建 API URL
+            let apiUrl = '/api/calendar?sources=' + sources.join(',');
+            if (holidayApi) {
+                apiUrl += '&holidayApi=' + encodeURIComponent(holidayApi);
+            }
+            if (yearRange) {
+                apiUrl += '&year=' + encodeURIComponent(yearRange);
+            }
+            
+            // 显示结果
+            const resultDiv = document.getElementById('custom-result');
+            const urlDiv = document.getElementById('custom-url');
+            urlDiv.textContent = window.location.origin + apiUrl;
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
