@@ -193,30 +193,65 @@ function flattenHolidays(holidaysData, icons = true) {
   return events;
 }
 
-// ===== 事件添加辅助 =====
+// ===== 事件去重 + 添加辅助 =====
 
-function addEvent(cal, ev) {
-  try {
-    const opts = {
-      summary: ev.summary || '',
-      description: ev.description || '',
-      allDay: true,
-    };
+/**
+ * 生成事件的去重 key
+ * 同一天 + 同标题视为重复（忽略 emoji 前缀差异）
+ */
+function dedupeKey(ev) {
+  const date = ev.date || '';
+  const summary = (ev.summary || '').replace(/^[\s\S]{0,4}?\s/, ''); // 去掉前 2 个字符（emoji+空格）
+  const endDate = ev.endDate || '';
+  return `${date}|${summary}|${endDate}`;
+}
 
-    if (ev.endDate) {
-      opts.start = dayjs(ev.date).toDate();
-      opts.end = dayjs(ev.endDate).add(1, 'day').toDate();
-    } else {
-      opts.start = dayjs(ev.date).toDate();
+/**
+ * 创建一个带去重功能的事件收集器
+ * @returns {{ add: (cal, ev) => void, stats: () => { total: number, duplicates: number } }}
+ */
+function createEventCollector() {
+  const seen = new Set();
+  let total = 0;
+  let duplicates = 0;
+
+  function add(cal, ev) {
+    const key = dedupeKey(ev);
+    total++;
+    if (seen.has(key)) {
+      duplicates++;
+      return;
     }
+    seen.add(key);
+    try {
+      const opts = {
+        summary: ev.summary || '',
+        description: ev.description || '',
+        allDay: true,
+      };
 
-    if (ev.busy === 'busy') opts.busyStatus = 'BUSY';
-    else if (ev.busy === 'free') opts.busyStatus = 'FREE';
+      if (ev.endDate) {
+        opts.start = dayjs(ev.date).toDate();
+        opts.end = dayjs(ev.endDate).add(1, 'day').toDate();
+      } else {
+        opts.start = dayjs(ev.date).toDate();
+      }
 
-    cal.createEvent(opts);
-  } catch (e) {
-    // 跳过无效事件
+      if (ev.busy === 'busy') opts.busyStatus = 'BUSY';
+      else if (ev.busy === 'free') opts.busyStatus = 'FREE';
+
+      cal.createEvent(opts);
+    } catch (e) {
+      // 跳过无效事件
+    }
   }
+
+  return {
+    add,
+    stats() {
+      return { total, duplicates, unique: total - duplicates };
+    },
+  };
 }
 
 // ===== 主生成逻辑 =====
@@ -237,6 +272,7 @@ async function generateCalendar({ sources, holidayApi, year, icons = true }) {
   }
 
   const cal = new ICalCalendar({ name: `定制日历 ${startYear}-${endYear}` });
+  const collector = createEventCollector();
 
   // 1. 节假日
   if (sources.includes('holidays')) {
@@ -251,7 +287,7 @@ async function generateCalendar({ sources, holidayApi, year, icons = true }) {
       }
 
       const events = flattenHolidays(holidaysData, icons);
-      events.forEach(ev => addEvent(cal, ev));
+      events.forEach(ev => collector.add(cal, ev));
       console.log(`[generate] 节假日事件：${events.length} 条`);
     } catch (e) {
       console.error('[generate] 节假日抓取失败：', e.message);
@@ -264,7 +300,7 @@ async function generateCalendar({ sources, holidayApi, year, icons = true }) {
 
   function processEvents(evList) {
     if (!icons) evList.forEach(ev => { ev.summary = stripAllEmoji(ev.summary); });
-    evList.forEach(ev => addEvent(cal, ev));
+    evList.forEach(ev => collector.add(cal, ev));
   }
 
   if (sources.includes('lunar') && lunarData.lunarEvents) {
@@ -287,11 +323,16 @@ async function generateCalendar({ sources, holidayApi, year, icons = true }) {
       const { getFestivalEvents } = await getFestivals();
       const events = getFestivalEvents(startYear, endYear);
       if (!icons) events.forEach(ev => { ev.summary = stripAllEmoji(ev.summary); });
-      events.forEach(ev => addEvent(cal, ev));
+      events.forEach(ev => collector.add(cal, ev));
       console.log(`[generate] 节日事件：${events.length} 条`);
     } catch (e) {
       console.error('[generate] 节日生成失败：', e.message);
     }
+  }
+
+  const { unique, duplicates: dupCount } = collector.stats();
+  if (dupCount > 0) {
+    console.log(`[generate] 去重完成：共 ${unique} 条唯一事件，移除 ${dupCount} 条重复`);
   }
 
   return cal.toString();
