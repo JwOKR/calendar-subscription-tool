@@ -17,6 +17,21 @@
   📅 festivals.ics
      
 
+  📅 china-holidays-noicon.ics
+     
+
+  📅 lunar-calendar-noicon.ics
+     
+
+  📅 solar-terms-noicon.ics
+     
+
+  📅 yi-ji-noicon.ics
+     
+
+  📅 festivals-noicon.ics
+     
+
 === 导入方式 ===
 iOS / macOS 日历：在「文件」>「导入」中选择 .ics 文件
 Google Calendar：设置 > 导入和导出 > 导入

@@ -146,8 +146,10 @@ function parseDate(dateStr) {
 
 /**
  * 从 config.json 读取合并配置并执行合并
+ * @param {Object} [opts]
+ * @param {string} [opts.fileSuffix=''] - 文件名后缀（如 '-noicon'），自动变换源路径和输出文件名
  */
-async function mergeFromConfig() {
+async function mergeFromConfig({ fileSuffix = '' } = {}) {
   if (!fs.existsSync(CONFIG_FILE)) {
     console.error('[合并] config.json 不存在，请先配置 mergeSources');
     console.log('示例 config.json 格式：');
@@ -165,15 +167,33 @@ async function mergeFromConfig() {
   }
 
   const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
-  const sources = config.mergeSources;
+  let sources = config.mergeSources;
   if (!sources || !Array.isArray(sources)) {
     console.error('[合并] config.json 中未找到 mergeSources 数组');
     return null;
   }
 
+  // 如果有 fileSuffix，变换所有本地源路径
+  if (fileSuffix) {
+    sources = sources.map(s => {
+      if (s.startsWith('http://') || s.startsWith('https://')) return s; // 远程 URL 不变
+      const ext = path.extname(s);
+      const base = path.basename(s, ext);
+      const dir = path.dirname(s);
+      return path.join(dir, `${base}${fileSuffix}${ext}`);
+    });
+  }
+
+  let output = config.mergeOutput || 'all-in-one.ics';
+  if (fileSuffix) {
+    const ext = path.extname(output);
+    const base = path.basename(output, ext);
+    output = `${base}${fileSuffix}${ext}`;
+  }
+
   return await mergeSources({
     sources,
-    output: config.mergeOutput || 'all-in-one.ics',
+    output,
     calName: config.mergeCalName || '合并日历',
     calDesc: config.mergeCalDesc || '多个日历源合并',
   });

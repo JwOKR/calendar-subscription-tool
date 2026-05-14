@@ -114,81 +114,71 @@ function writeICS({ filename, calName, calDesc, events, color, stripEmoji }) {
 /**
  * 生成所有日历文件
  * @param {Object} allData - { holidayEvents, lunarEvents, solarTermEvents, yiJiEvents }
+ * @param {Object} [opts]
+ * @param {boolean} [opts.stripEmoji=false] - 是否去除事件名称中的 emoji
+ * @param {string}  [opts.fileSuffix='']    - 文件名后缀（如 '-noicon'）
  * @returns {string[]} - 生成的文件路径列表
  */
-function generateAllICS(allData) {
+function generateAllICS(allData, { stripEmoji = false, fileSuffix = '' } = {}) {
   const files = [];
-
-  // 从 config.json 读取 stripEmoji 配置（默认 true）
-  let shouldStripEmoji = true;
-  try {
-    const configPath = path.join(__dirname, '..', 'config.json');
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    if (typeof config.stripEmoji === 'boolean') {
-      shouldStripEmoji = config.stripEmoji;
-    }
-  } catch (e) {
-    // 配置读取失败，使用默认 true
-  }
-  const stripOpt = shouldStripEmoji;
 
   // 1. 节假日 + 调休
   if (allData.holidayEvents && allData.holidayEvents.length > 0) {
     files.push(writeICS({
-      filename: 'china-holidays.ics',
+      filename: `china-holidays${fileSuffix}.ics`,
       calName: '中国节假日·调休',
       calDesc: '中国法定节假日与调休安排（数据源：timor.tech）',
       events: allData.holidayEvents,
       color: '#E74C3C',
-      stripEmoji: stripOpt,
+      stripEmoji: stripEmoji,
     }));
   }
 
   // 2. 农历日期提醒
   if (allData.lunarEvents && allData.lunarEvents.length > 0) {
     files.push(writeICS({
-      filename: 'lunar-calendar.ics',
+      filename: `lunar-calendar${fileSuffix}.ics`,
       calName: '农历日期',
       calDesc: '农历初一及农历节日提醒（本地计算）',
       events: allData.lunarEvents,
       color: '#8E44AD',
-      stripEmoji: stripOpt,
+      stripEmoji: stripEmoji,
     }));
   }
 
   // 3. 二十四节气
   if (allData.solarTermEvents && allData.solarTermEvents.length > 0) {
     files.push(writeICS({
-      filename: 'solar-terms.ics',
+      filename: `solar-terms${fileSuffix}.ics`,
       calName: '二十四节气',
       calDesc: '中国二十四节气（本地计算）',
       events: allData.solarTermEvents,
       color: '#27AE60',
-      stripEmoji: stripOpt,
+      stripEmoji: stripEmoji,
     }));
   }
 
   // 4. 每日宜忌（数据量较大，可选）
   if (allData.yiJiEvents && allData.yiJiEvents.length > 0) {
     files.push(writeICS({
-      filename: 'yi-ji.ics',
+      filename: `yi-ji${fileSuffix}.ics`,
       calName: '每日宜忌',
       calDesc: '老黄历每日宜忌（本地计算）',
       events: allData.yiJiEvents,
       color: '#F39C12',
-      stripEmoji: stripOpt,
+      stripEmoji: stripEmoji,
     }));
   }
 
   // 5. 普通节日（公历+国际+动态日期）
   if (allData.festivalEvents && allData.festivalEvents.length > 0) {
     files.push(writeICS({
-      filename: 'festivals.ics',
+      filename: `festivals${fileSuffix}.ics`,
       calName: '普通节日',
       calDesc: '中国公历节日、国际节日及动态日期节日（本地计算）',
       events: allData.festivalEvents,
       color: '#E67E22',
-      stripEmoji: stripOpt,
+      stripEmoji: stripEmoji,
     }));
   }
 

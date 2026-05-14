@@ -160,8 +160,10 @@ async function main() {
         calDesc: '多个日历源合并',
       });
     } else {
-      console.log('[合并] 按 config.json 配置合并...');
-      await mergeFromConfig();
+      console.log('[合并] 按 config.json 配置合并（带图标版）...');
+      await mergeFromConfig({ fileSuffix: '' });
+      console.log('[合并] 按 config.json 配置合并（纯文字版）...');
+      await mergeFromConfig({ fileSuffix: '-noicon' });
     }
     return;
   }
@@ -221,15 +223,18 @@ async function main() {
     console.log(`  ✓ 普通节日：${festivalEvents.length} 条`);
   }
 
-  // 4. 生成 .ics 文件
-  console.log(`\n[主程序] 生成 .ics 文件...`);
-  const files = generateAllICS(allData);
+  // 4. 生成 .ics 文件（两套：带图标 + 纯文字）
+  console.log(`\n[主程序] 生成 .ics 文件（带图标版）...`);
+  const filesWithIcons = generateAllICS(allData, { stripEmoji: false, fileSuffix: '' });
+
+  console.log(`\n[主程序] 生成 .ics 文件（纯文字版）...`);
+  const filesNoIcons = generateAllICS(allData, { stripEmoji: true, fileSuffix: '-noicon' });
 
   // 5. 生成说明文件
-  generateReadme(files);
+  generateReadme([...filesWithIcons, ...filesNoIcons]);
 
   console.log(`\n✅ 全部完成！文件已保存至 output/ 目录`);
-  console.log(`   共生成 ${files.length} 个 .ics 文件`);
+  console.log(`   共生成 ${filesWithIcons.length + filesNoIcons.length} 个 .ics 文件（带图标 ${filesWithIcons.length} + 纯文字 ${filesNoIcons.length}）`);
 
   // 6. 如果指定了 --serve，启动 HTTP 服务
   if (config.serve) {

@@ -20,6 +20,25 @@ const currentYear = dayjs().year();
 const startYear = currentYear - 5;
 const endYear = currentYear + 2;
 
+/**
+ * 生成双版本订阅链接 HTML
+ * @param {string} filename - 文件名（不含扩展名）
+ * @returns {string} HTML
+ */
+function dualLinks(filename) {
+  const withIcon = `${repoUrl}/${filename}.ics`;
+  const noIcon = `${repoUrl}/${filename}-noicon.ics`;
+  return `
+                    <div class="url-group">
+                        <span class="url-label">🎨 带图标</span>
+                        <div class="subscription-url" onclick="copyToClipboard(this)">${withIcon}</div>
+                    </div>
+                    <div class="url-group">
+                        <span class="url-label">📝 纯文字</span>
+                        <div class="subscription-url" onclick="copyToClipboard(this)">${noIcon}</div>
+                    </div>`;
+}
+
 const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -42,6 +61,8 @@ const html = `<!DOCTYPE html>
         .card.a-allinone { border-left-color:#48bb78; background:linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); }
         .subscription-url { background:#f8f9fa; border:2px solid #e9ecef; border-radius:10px; padding:12px 16px; font-family:'Courier New',monospace; font-size:13px; color:#667eea; word-break:break-all; cursor:pointer; transition:all 0.2s; user-select:all; }
         .subscription-url:hover { background:#e7f0ff; border-color:#667eea; }
+        .url-group { margin-bottom:8px; }
+        .url-label { display:block; color:#999; font-size:12px; margin-bottom:4px; font-weight:500; }
         .badge { display:inline-block; background:#667eea; color:white; padding:3px 10px; border-radius:12px; font-size:11px; margin-left:8px; font-weight:600; vertical-align:middle; }
         .btn { display:inline-block; padding:14px 32px; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; transition:all 0.2s; cursor:pointer; border:none; }
         .btn-primary { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; box-shadow:0 4px 12px rgba(102,126,234,0.4); }
@@ -134,7 +155,7 @@ const html = `<!DOCTYPE html>
             <div class="card">
                 <h3>🇨🇳 中国节假日</h3>
                 <p>国务院办公厅发布的法定节假日 + 调休安排</p>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}/china-holidays.ics</div>
+                ${dualLinks('china-holidays')}
                 <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
                 <div class="preview-content">
                     <ul>
@@ -149,7 +170,7 @@ const html = `<!DOCTYPE html>
             <div class="card">
                 <h3>🌙 农历日历</h3>
                 <p>农历日期 + 传统节日（春节、中秋、端午等）</p>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}/lunar-calendar.ics</div>
+                ${dualLinks('lunar-calendar')}
                 <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
                 <div class="preview-content">
                     <ul>
@@ -162,7 +183,7 @@ const html = `<!DOCTYPE html>
             <div class="card">
                 <h3>☀️ 二十四节气</h3>
                 <p>完整二十四节气，精准到分钟</p>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}/solar-terms.ics</div>
+                ${dualLinks('solar-terms')}
                 <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
                 <div class="preview-content">
                     <ul>
@@ -176,7 +197,7 @@ const html = `<!DOCTYPE html>
             <div class="card">
                 <h3>📋 宜忌日历</h3>
                 <p>每日宜忌 + 吉神凶煞（传统黄历）</p>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}/yi-ji.ics</div>
+                ${dualLinks('yi-ji')}
                 <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
                 <div class="preview-content">
                     <ul>
@@ -191,7 +212,7 @@ const html = `<!DOCTYPE html>
             <div class="card">
                 <h3>🎉 普通节日</h3>
                 <p>公历节日 + 国际节日 + 动态日期节日</p>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}/festivals.ics</div>
+                ${dualLinks('festivals')}
                 <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
                 <div class="preview-content">
                     <ul>
@@ -210,7 +231,7 @@ const html = `<!DOCTYPE html>
                     <span class="merge-tag">☀️ 二十四节气</span>
                     <span class="merge-tag">🎉 普通节日</span>
                 </div>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}/all-in-one.ics</div>
+                ${dualLinks('all-in-one')}
             </div>
         </div>
 
@@ -336,6 +357,10 @@ const html = `<!DOCTYPE html>
                 <div style="margin-bottom:16px;">
                     <h4 style="color:#333; margin-bottom:6px;">订阅后看不到日历事件？</h4>
                     <p style="color:#666; font-size:14px; line-height:1.6;">请检查日历应用中是否已启用该订阅日历（在「日历」列表中勾选显示）。部分应用同步可能需要几分钟。</p>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <h4 style="color:#333; margin-bottom:6px;">「带图标」和「纯文字」有什么区别？</h4>
+                    <p style="color:#666; font-size:14px; line-height:1.6;">带图标版在事件名称前加 emoji 前缀（如 🎉 元旦），在日历中更醒目。纯文字版去除所有 emoji（如 元旦），适合偏好简洁显示的用户。两版内容完全相同，只是显示样式不同。</p>
                 </div>
                 <div>
                     <h4 style="color:#333; margin-bottom:6px;">静态版和 Workers 版有什么区别？</h4>
