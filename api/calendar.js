@@ -350,7 +350,7 @@ module.exports = async (req, res) => {
 
     const filename = `calendar-${filtered.join('-')}.ics`;
     res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
-    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
 
     return res.status(200).send(icsContent);
