@@ -455,6 +455,12 @@ function renderHTML(origin) {
             <div class="card a-allinone">
                 <h3>🚀 全能日历 <span class="badge" style="background:#48bb78;">ALL-IN-ONE</span></h3>
                 <p>合并所有日历源，一个订阅搞定所有</p>
+                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;">
+                    <span style="background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600;">🇨🇳 中国节假日</span>
+                    <span style="background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600;">🌙 农历日历</span>
+                    <span style="background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600;">☀️ 二十四节气</span>
+                    <span style="background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600;">🎉 普通节日</span>
+                </div>
                 <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}?sources=holidays,lunar,solar,festivals</div>
             </div>
         </div>
