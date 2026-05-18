@@ -769,20 +769,24 @@ export default {
 
       console.log(`[API] 请求：sources=${filtered.join(',')} year=${year || 'default'} icons=${icons}`);
 
-      // 判断是否为标准请求（无自定义 year/holidayApi），优先走静态文件代理
+      // 判断是否为标准请求（无自定义 year/holidayApi），走静态文件代理
       const sourcesKey = filtered.join(',');
       const isStandardRequest = !year && !holidayApi;
+
       let icsContent = null;
 
       if (isStandardRequest) {
         icsContent = await fetchStaticICS(sourcesKey, icons);
-      }
-
-      // 静态代理失败或非标准请求，走动态生成
-      if (!icsContent) {
-        if (isStandardRequest) {
-          console.log('[API] 静态代理未命中，回退动态生成...');
+        // 标准请求：静态代理失败，返回 503（不回退动态生成，避免返回不完整 ICS）
+        if (!icsContent) {
+          console.log('[API] 静态代理失败，返回 503');
+          return new Response('Temporary unavailable. Please try again later.', {
+            status: 503,
+            headers: corsHeaders,
+          });
         }
+      } else {
+        // 非标准请求（自定义参数），走动态生成
         icsContent = await generateCalendar({
           sources: filtered,
           holidayApi: holidayApi || null,
