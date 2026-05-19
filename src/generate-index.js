@@ -2,6 +2,10 @@
 /**
  * 生成订阅管理页面 index.html
  * 用法：node src/generate-index.js <outputDir> <repoOwner> <repoName> <timestamp>
+ *
+ * 此脚本生成的 HTML 需与以下文件保持界面一致：
+ *   - calendar-miniprogram/pages/index/index.wxml (小程序界面)
+ *   - src/worker.js 中的 renderHTML() 函数 (CF Workers 界面)
  */
 
 const fs = require('fs');
@@ -9,7 +13,7 @@ const path = require('path');
 const dayjs = require('dayjs');
 
 const outputDir = process.argv[2] || 'output';
-const repoOwner = process.argv[3] || process.env.GITHUB_REPOSITORY_OWNER || 'unknown';
+const repoOwner = process.argv[3] || process.env.GITHUB_REPOSITORY_OWNER || 'JwOKR';
 const repoName = process.argv[4] || process.env.GITHUB_REPOSITORY_NAME || 'calendar-subscription-tool';
 const timestamp = process.argv[5] || new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
 
@@ -21,22 +25,38 @@ const startYear = currentYear - 5;
 const endYear = currentYear + 2;
 
 /**
- * 生成双版本订阅链接 HTML
- * @param {string} filename - 文件名（不含扩展名）
- * @returns {string} HTML
+ * 生成单链接 HTML（带 data-icon / data-noicon 属性，由切换开关控制显示）
+ * @param {string} fileBase - 文件名基础（不含扩展名，不含 -noicon 后缀）
+ * @returns {string} HTML 片段
  */
-function dualLinks(filename) {
-  const withIcon = `${repoUrl}/${filename}.ics`;
-  const noIcon = `${repoUrl}/${filename}-noicon.ics`;
+function singleLink(fileBase) {
+  const withIcon = `${repoUrl}/${fileBase}.ics`;
+  const noIcon = `${repoUrl}/${fileBase}-noicon.ics`;
   return `
-                    <div class="url-group">
-                        <span class="url-label">🎨 带图标</span>
-                        <div class="subscription-url" onclick="copyToClipboard(this)">${withIcon}</div>
-                    </div>
-                    <div class="url-group">
-                        <span class="url-label">📝 纯文字</span>
-                        <div class="subscription-url" onclick="copyToClipboard(this)">${noIcon}</div>
-                    </div>`;
+                    <div class="url-label" id="label-${fileBase}">📝 无图标版</div>
+                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="${withIcon}" data-noicon="${noIcon}">${noIcon}</div>`;
+}
+
+/**
+ * 生成分区卡片 HTML
+ * @param {string} id       - 订阅源标识（用于 label-${id}）
+ * @param {string} icon     - 卡片标题图标
+ * @param {string} title    - 卡片标题文本
+ * @param {string} desc     - 描述文字
+ * @param {string} fileBase - ICS 文件名基础
+ * @param {string} [preview] - 可选：预览内容 HTML
+ * @returns {string}
+ */
+function card(id, icon, title, desc, fileBase, preview) {
+  const previewHtml = preview
+    ? `                <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>\n                <div class="preview-content">\n${preview}\n                </div>`
+    : '';
+  return `            <div class="card">
+                <h3>${icon} ${title}</h3>
+                <p>${desc}</p>
+                ${singleLink(fileBase)}
+${previewHtml}
+            </div>`;
 }
 
 const html = `<!DOCTYPE html>
@@ -61,14 +81,11 @@ const html = `<!DOCTYPE html>
         .card.a-allinone { border-left-color:#48bb78; background:linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); }
         .subscription-url { background:#f8f9fa; border:2px solid #e9ecef; border-radius:10px; padding:12px 16px; font-family:'Courier New',monospace; font-size:13px; color:#667eea; word-break:break-all; cursor:pointer; transition:all 0.2s; user-select:all; }
         .subscription-url:hover { background:#e7f0ff; border-color:#667eea; }
-        .url-group { margin-bottom:8px; }
         .url-label { display:block; color:#999; font-size:12px; margin-bottom:4px; font-weight:500; }
         .badge { display:inline-block; background:#667eea; color:white; padding:3px 10px; border-radius:12px; font-size:11px; margin-left:8px; font-weight:600; vertical-align:middle; }
         .btn { display:inline-block; padding:14px 32px; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; transition:all 0.2s; cursor:pointer; border:none; }
         .btn-primary { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; box-shadow:0 4px 12px rgba(102,126,234,0.4); }
         .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(102,126,234,0.5); }
-        .btn-secondary { background:white; color:#667eea; border:2px solid #667eea; }
-        .btn-secondary:hover { background:#667eea; color:white; }
         .guide-card { background:white; border-radius:16px; padding:30px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
         .guide-card h2 { color:#667eea; margin-bottom:20px; font-size:22px; }
         .step { display:flex; margin-bottom:20px; align-items:flex-start; }
@@ -77,11 +94,6 @@ const html = `<!DOCTYPE html>
         .step-content h4 { color:#333; margin-bottom:6px; font-size:15px; }
         .step-content p { color:#666; font-size:14px; line-height:1.6; }
         code { background:#f0f0f0; padding:2px 8px; border-radius:4px; font-size:13px; color:#d63384; }
-        .config-preview { background:#1e1e1e; color:#d4d4d4; padding:20px; border-radius:10px; font-family:'Courier New',monospace; font-size:13px; overflow-x:auto; margin-top:12px; line-height:1.6; }
-        .config-preview .key { color:#9cdcfe; }
-        .config-preview .string { color:#ce9178; }
-        .config-preview .boolean { color:#569cd6; }
-        .config-preview .comment { color:#6a9955; }
         .tab-bar { display:flex; border-bottom:2px solid rgba(255,255,255,0.3); margin-bottom:20px; }
         .tab { padding:12px 24px; cursor:pointer; color:rgba(255,255,255,0.7); font-weight:500; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all 0.2s; }
         .tab.active { color:white; border-bottom-color:white; font-weight:600; }
@@ -92,6 +104,19 @@ const html = `<!DOCTYPE html>
         .footer { text-align:center; color:rgba(255,255,255,0.8); font-size:13px; margin-top:30px; padding-bottom:20px; }
         .footer a { color:white; text-decoration:underline; }
         ul { color:#666; font-size:14px; line-height:1.8; margin-top:8px; padding-left:20px; }
+
+        /* 图标切换开关 */
+        .icon-toggle { display:flex; align-items:center; justify-content:center; gap:16px; background:white; border-radius:16px; padding:16px 24px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+        .toggle-label { font-size:15px; color:#333; font-weight:500; }
+        .toggle-switch { position:relative; width:56px; height:30px; cursor:pointer; display:inline-block; flex-shrink:0; }
+        .toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
+        .toggle-track { position:absolute; inset:0; border-radius:30px; transition:background 0.3s; }
+        .toggle-dot { position:absolute; top:3px; width:24px; height:24px; border-radius:50%; background:white; box-shadow:0 2px 4px rgba(0,0,0,0.2); transition:left 0.3s; }
+        .toggle-switch input:not(:checked) ~ .toggle-track { background:#667eea; }
+        .toggle-switch input:checked ~ .toggle-track { background:#f093fb; }
+        .toggle-switch input:not(:checked) ~ .toggle-dot { left:3px; }
+        .toggle-switch input:checked ~ .toggle-dot { left:29px; }
+        .toggle-text { font-size:13px; color:#666; min-width:70px; text-align:center; }
 
         /* Workers 横幅 */
         .workers-banner { background:linear-gradient(135deg, #f6e05e 0%, #ed8936 100%); border-radius:12px; padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
@@ -111,15 +136,6 @@ const html = `<!DOCTYPE html>
         .merge-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
         .merge-tag { background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600; }
 
-        /* 图标开关 */
-        .toggle-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-        .toggle-switch { position:relative; display:inline-block; width:48px; height:26px; cursor:pointer; }
-        .toggle-switch input { opacity:0; width:0; height:0; }
-        .toggle-track { position:absolute; inset:0; background:#ccc; border-radius:26px; transition:0.3s; }
-        .toggle-dot { position:absolute; left:3px; top:3px; width:20px; height:20px; background:white; border-radius:50%; transition:0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.2); }
-        .toggle-switch input:checked ~ .toggle-track { background:#667eea; }
-        .toggle-switch input:checked ~ .toggle-dot { transform:translateX(22px); }
-
         /* 更新时间脉冲 */
         .pulse-dot { display:inline-block; width:8px; height:8px; background:#48bb78; border-radius:50%; margin-right:6px; animation:pulse 2s infinite; }
         @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
@@ -134,6 +150,17 @@ const html = `<!DOCTYPE html>
             <div style="margin-top:12px;">
                 <span class="year-range-badge">📅 覆盖年份：${startYear} - ${endYear}</span>
             </div>
+        </div>
+
+        <!-- 图标版本切换 -->
+        <div class="icon-toggle">
+            <span class="toggle-text" id="toggleText">📝 无图标版</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="iconToggle" onchange="toggleIconMode()">
+                <span class="toggle-track"></span>
+                <span class="toggle-dot"></span>
+            </label>
+            <span class="toggle-label">订阅版本</span>
         </div>
 
         <!-- CF Workers 横幅 -->
@@ -151,77 +178,8 @@ const html = `<!DOCTYPE html>
 
         <!-- 订阅标签页 -->
         <div id="tab-0" class="tab-content active">
-            <div class="section-title">🇨🇳 中国节假日 <span class="badge">推荐</span></div>
-            <div class="card">
-                <h3>🇨🇳 中国节假日</h3>
-                <p>国务院办公厅发布的法定节假日 + 调休安排</p>
-                ${dualLinks('china-holidays')}
-                <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
-                <div class="preview-content">
-                    <ul>
-                        <li>🎉 法定假期事件（元旦、春节、清明、劳动、端午、中秋、国庆）</li>
-                        <li>💼 调休补班日（春节前/后补班、国庆前/后补班等）</li>
-                        <li>📅 覆盖 ${startYear}-${endYear} 年，共约 80+ 条事件</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="section-title">🌙 农历 · 节气 · 宜忌</div>
-            <div class="card">
-                <h3>🌙 农历日历</h3>
-                <p>农历日期 + 传统节日（春节、中秋、端午等）</p>
-                ${dualLinks('lunar-calendar')}
-                <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
-                <div class="preview-content">
-                    <ul>
-                        <li>🌙 每月初一标记（农历正月 ~ 腊月）</li>
-                        <li>🏮 传统节日（除夕、春节、元宵、端午、七夕、中秋、重阳、腊八、小年）</li>
-                        <li>🐉 龙抬头、七夕节等特色节日</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="card">
-                <h3>☀️ 二十四节气</h3>
-                <p>完整二十四节气，精准到分钟</p>
-                ${dualLinks('solar-terms')}
-                <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
-                <div class="preview-content">
-                    <ul>
-                        <li>🌿 春：立春、雨水、惊蛰、春分、清明、谷雨</li>
-                        <li>🌿 夏：立夏、小满、芒种、夏至、小暑、大暑</li>
-                        <li>🌿 秋：立秋、处暑、白露、秋分、寒露、霜降</li>
-                        <li>🌿 冬：立冬、小雪、大雪、冬至、小寒、大寒</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="card">
-                <h3>📋 宜忌日历</h3>
-                <p>每日宜忌 + 吉神凶煞（传统黄历）</p>
-                ${dualLinks('yi-ji')}
-                <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
-                <div class="preview-content">
-                    <ul>
-                        <li>✅ 每日宜（嫁娶、出行、搬家、开业等）</li>
-                        <li>❌ 每日忌（诸事不宜等）</li>
-                        <li>📅 每天 1 条事件，全年 365/366 条</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="section-title">🎉 节日 · 全能</div>
-            <div class="card">
-                <h3>🎉 普通节日</h3>
-                <p>公历节日 + 国际节日 + 动态日期节日</p>
-                ${dualLinks('festivals')}
-                <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
-                <div class="preview-content">
-                    <ul>
-                        <li>🇨🇳 中国节日（元旦、妇女节、植树节、青年节、儿童节、建军节、教师节等）</li>
-                        <li>🌍 国际节日（情人节、愚人节、圣诞节、万圣节等）</li>
-                        <li>📅 动态日期节日（母亲节、父亲节、感恩节等）</li>
-                    </ul>
-                </div>
-            </div>
+            <!-- 🃏 推荐 -->
+            <div class="section-title">🃏 推荐</div>
             <div class="card a-allinone">
                 <h3>🚀 全能日历 <span class="badge" style="background:#48bb78;">ALL-IN-ONE</span></h3>
                 <p>合并所有日历源，一个订阅搞定所有</p>
@@ -231,8 +189,44 @@ const html = `<!DOCTYPE html>
                     <span class="merge-tag">☀️ 二十四节气</span>
                     <span class="merge-tag">🎉 普通节日</span>
                 </div>
-                ${dualLinks('all-in-one')}
+                ${singleLink('all-in-one')}
             </div>
+
+            <!-- 📋 宜忌日历 -->
+            <div class="section-title">📋 宜忌日历</div>
+            ${card('yi-ji', '📋', '宜忌日历', '每日宜忌 + 吉神凶煞（传统黄历）', 'yi-ji',
+            `                    <ul>
+                        <li>✅ 每日宜（嫁娶、出行、搬家、开业等）</li>
+                        <li>❌ 每日忌（诸事不宜等）</li>
+                        <li>📅 每天 1 条事件，全年 365/366 条</li>
+                    </ul>`)}
+            <!-- 🇨🇳 中国节假日 · 农历 · 节气 · 节日 -->
+            <div class="section-title">🇨🇳 中国节假日 · 农历 · 节气 · 节日</div>
+            ${card('china-holidays', '🇨🇳', '中国节假日', '国务院办公厅发布的法定节假日 + 调休安排', 'china-holidays',
+            `                    <ul>
+                        <li>🎉 法定假期事件（元旦、春节、清明、劳动、端午、中秋、国庆）</li>
+                        <li>💼 调休补班日（春节前/后补班、国庆前/后补班等）</li>
+                        <li>📅 覆盖 ${startYear}-${endYear} 年，共约 80+ 条事件</li>
+                    </ul>`)}
+            ${card('lunar-calendar', '🌙', '农历日历', '农历日期 + 传统节日（春节、中秋、端午等）', 'lunar-calendar',
+            `                    <ul>
+                        <li>🌙 每月初一标记（农历正月 ~ 腊月）</li>
+                        <li>🏮 传统节日（除夕、春节、元宵、端午、七夕、中秋、重阳、腊八、小年）</li>
+                        <li>🐉 龙抬头、七夕节等特色节日</li>
+                    </ul>`)}
+            ${card('solar-terms', '☀️', '二十四节气', '完整二十四节气，精准到分钟', 'solar-terms',
+            `                    <ul>
+                        <li>🌿 春：立春、雨水、惊蛰、春分、清明、谷雨</li>
+                        <li>🌿 夏：立夏、小满、芒种、夏至、小暑、大暑</li>
+                        <li>🌿 秋：立秋、处暑、白露、秋分、寒露、霜降</li>
+                        <li>🌿 冬：立冬、小雪、大雪、冬至、小寒、大寒</li>
+                    </ul>`)}
+            ${card('festivals', '🎉', '普通节日', '公历节日 + 国际节日 + 动态日期节日', 'festivals',
+            `                    <ul>
+                        <li>🇨🇳 中国节日（元旦、妇女节、植树节、青年节、儿童节、建军节、教师节等）</li>
+                        <li>🌍 国际节日（情人节、愚人节、圣诞节、万圣节等）</li>
+                        <li>📅 动态日期节日（母亲节、父亲节、感恩节等）</li>
+                    </ul>`)}
         </div>
 
         <!-- 定制标签页 -->
@@ -240,7 +234,6 @@ const html = `<!DOCTYPE html>
             <div class="guide-card">
                 <h2>⚙️ 定制我的日历</h2>
                 <p style="color:#666; margin-bottom:24px; line-height:1.6;">以下配置通过 <a href="${workersUrl}" target="_blank" style="color:#667eea;">Cloudflare Workers</a> 实时生成日历，支持灵活定制：</p>
-
                 <!-- 配置表单 -->
                 <div style="background:#f8f9fa; padding:20px; border-radius:12px; margin-bottom:20px;">
                     <div style="margin-bottom:16px;">
@@ -273,12 +266,13 @@ const html = `<!DOCTYPE html>
                         <input type="text" id="yearRange" value="${currentYear}-${currentYear + 2}" placeholder="例如：${startYear}-${endYear}" style="width:200px; padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
                     </div>
 
-                    <div class="toggle-row">
-                        <label style="color:#333; font-weight:600; font-size:15px;">🎨 事件名称显示图标</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="iconsToggle" checked>
-                            <span class="toggle-track"></span>
-                            <span class="toggle-dot"></span>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; color:#333; font-weight:600; margin-bottom:8px;">🎨 事件名称显示图标</label>
+                        <label style="display:inline-flex; align-items:center; cursor:pointer; margin-right:20px;">
+                            <input type="radio" name="icons" value="true" checked style="margin-right:6px;"> 显示 emoji 图标（🎉 元旦（假期））
+                        </label>
+                        <label style="display:inline-flex; align-items:center; cursor:pointer;">
+                            <input type="radio" name="icons" value="false" style="margin-right:6px;"> 不显示图标（元旦（假期））
                         </label>
                     </div>
 
@@ -288,8 +282,8 @@ const html = `<!DOCTYPE html>
                 <!-- 生成的订阅链接 -->
                 <div id="custom-result" style="display:none; background:linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); padding:20px; border-radius:12px; border-left:5px solid #48bb78;">
                     <h4 style="color:#2f855a; margin-bottom:10px;">✅ 你的个性化订阅链接已生成！</h4>
-                    <div class="subscription-url" id="custom-url" onclick="copyToClipboard(this)" style="margin-bottom:12px;"></div>
-                    <p style="color:#666; font-size:13px;">💡 将此链接添加到你的日历应用（iOS 日历、Google Calendar、Outlook 等）</p>
+                    <div class="subscription-url" id="custom-url" onclick="copyUrl(this)"></div>
+                    <p style="color:#666; font-size:13px; margin-top:8px;">💡 将此链接添加到你的日历应用（iOS 日历、Google Calendar、Outlook 等）</p>
                 </div>
             </div>
 
@@ -297,7 +291,7 @@ const html = `<!DOCTYPE html>
             <div class="guide-card" style="margin-top:20px;">
                 <h2>🔧 高级选项：完整定制</h2>
                 <p style="color:#666; margin-bottom:16px; line-height:1.6;">如果你需要更完整的定制（修改节日列表、添加自定义节日等），可以 fork 此仓库：</p>
-                <a href="https://github.com/new?template=${repoFullName}" target="_blank" class="btn btn-secondary">🍴 Fork 此仓库</a>
+                <a href="https://github.com/new?template=${repoFullName}" target="_blank" class="btn btn-primary">🍴 Fork 此仓库</a>
             </div>
         </div>
 
@@ -318,7 +312,7 @@ const html = `<!DOCTYPE html>
                 <div class="step">
                     <div class="step-num">2</div>
                     <div class="step-content">
-                        <h4>🤖 Android (Google Calendar)</h4>
+                        <h4>🖥️ Android (Google Calendar)</h4>
                         <p>在手机浏览器打开 <a href="https://calendar.google.com" target="_blank" style="color:#667eea;">calendar.google.com</a> → 左上角 ☰ → 设置 → 添加日历 → 通过 URL → 粘贴链接</p>
                     </div>
                 </div>
@@ -378,6 +372,25 @@ const html = `<!DOCTYPE html>
     <div class="copy-toast" id="copyToast">✅ 已复制到剪贴板！</div>
 
     <script>
+        // 图标模式切换（默认无图标）
+        let iconMode = 'noicon';
+
+        function toggleIconMode() {
+            const checked = document.getElementById('iconToggle').checked;
+            iconMode = checked ? 'icon' : 'noicon';
+            const label = iconMode === 'icon' ? '🎨 带图标版' : '📝 无图标版';
+            document.getElementById('toggleText').textContent = label;
+
+            // 更新所有卡片的显示
+            document.querySelectorAll('.subscription-url').forEach(el => {
+                const url = el.dataset[iconMode];
+                el.textContent = url;
+            });
+            document.querySelectorAll('[id^="label-"]').forEach(el => {
+                el.textContent = label;
+            });
+        }
+
         function switchTab(index) {
             document.querySelectorAll('.tab').forEach((t, i) => {
                 t.classList.toggle('active', i === index);
@@ -386,7 +399,8 @@ const html = `<!DOCTYPE html>
                 c.classList.toggle('active', i === index);
             });
         }
-        function copyToClipboard(element) {
+
+        function copyUrl(element) {
             const text = element.textContent;
             navigator.clipboard.writeText(text).then(() => {
                 const toast = document.getElementById('copyToast');
@@ -394,15 +408,17 @@ const html = `<!DOCTYPE html>
                 setTimeout(() => toast.classList.remove('show'), 2000);
             });
         }
+
         function togglePreview(el) {
             const content = el.nextElementSibling;
             content.classList.toggle('show');
             el.textContent = content.classList.contains('show') ? '▴ 收起内容' : '▾ 查看包含内容';
         }
+
         function generateCustomSubscription() {
             const holidayApi = document.getElementById('holidayApi').value.trim();
             const yearRange = document.getElementById('yearRange').value.trim();
-            const showIcons = document.getElementById('iconsToggle').checked;
+            const showIcons = document.querySelector('input[name="icons"]:checked').value === 'true';
 
             const sources = [];
             if (document.getElementById('src-holidays').checked) sources.push('holidays');
