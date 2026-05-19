@@ -18,6 +18,14 @@ App({
         section: 'recommend'
       },
       {
+        id: 'yiji',
+        name: '宜忌日历',
+        icon: '📋',
+        desc: '每日宜忌 + 吉神凶煞（传统黄历）',
+        sources: 'yiji',
+        section: 'yiji'
+      },
+      {
         id: 'holidays',
         name: '中国节假日',
         icon: '🇨🇳',
@@ -25,7 +33,7 @@ App({
         badge: '推荐',
         badgeType: 'recommend',
         sources: 'holidays',
-        section: 'holidays'
+        section: 'combined'
       },
       {
         id: 'lunar',
@@ -33,7 +41,7 @@ App({
         icon: '🌙',
         desc: '农历日期 + 传统节日（春节、中秋、端午等）',
         sources: 'lunar',
-        section: 'lunar'
+        section: 'combined'
       },
       {
         id: 'solar',
@@ -41,15 +49,7 @@ App({
         icon: '☀️',
         desc: '完整二十四节气，精准到分钟',
         sources: 'solar',
-        section: 'lunar'
-      },
-      {
-        id: 'yiji',
-        name: '宜忌日历',
-        icon: '📋',
-        desc: '每日宜忌 + 吉神凶煞（传统黄历）',
-        sources: 'yiji',
-        section: 'lunar'
+        section: 'combined'
       },
       {
         id: 'festivals',
@@ -57,15 +57,14 @@ App({
         icon: '🎉',
         desc: '公历节日 + 国际节日 + 动态日期节日',
         sources: 'festivals',
-        section: 'festivals'
+        section: 'combined'
       }
     ],
-    // 分区标题映射（按 section 字段分组）
+    // 分区标题映射
     sectionTitles: {
       recommend: '🃏 推荐',
-      holidays: '🇨🇳 中国节假日',
-      lunar: '🌙 农历 · 节气 · 宜忌',
-      festivals: '🎉 节日'
+      yiji: '📋 宜忌日历',
+      combined: '🇨🇳 中国节假日 · 农历 · 节气 · 节日'
     }
   },
 
