@@ -1,0 +1,89 @@
+.sub-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 15rpx;
+  border-left: 6rpx solid #667eea;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+}
+
+.sub-card.all-in-one {
+  border-left-color: #48bb78;
+  background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+.badge {
+  background: #667eea;
+  color: white;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  margin-left: 10rpx;
+  font-weight: 600;
+}
+
+.badge.allinone {
+  background: #48bb78;
+}
+
+.card-desc {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 14rpx;
+  line-height: 1.5;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-bottom: 14rpx;
+}
+
+.tag {
+  background: rgba(72,187,120,0.15);
+  color: #2f855a;
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  font-weight: 600;
+}
+
+.url-group {
+  margin-bottom: 12rpx;
+}
+
+.url-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 6rpx;
+  display: block;
+}
+
+.url-box {
+  background: #f8f9fa;
+  border: 2rpx solid #e9ecef;
+  border-radius: 10rpx;
+  padding: 12rpx 16rpx;
+  font-size: 22rpx;
+  color: #667eea;
+  word-break: break-all;
+}
+
+.url-box:active {
+  background: #e7f0ff;
+  border-color: #667eea;
+}

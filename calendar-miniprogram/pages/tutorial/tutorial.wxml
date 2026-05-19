@@ -1,0 +1,55 @@
+<view class="container">
+  <view class="header-card">
+    <view class="title">📱 如何订阅日历？</view>
+  </view>
+
+  <view class="section-title">iOS / iPadOS</view>
+  <view class="step">
+    <view class="step-num">1</view>
+    <view class="step-content">
+      <view class="step-title">🍎 iOS / iPadOS</view>
+      <view class="step-desc">打开 "日历" 应用 → 点击 "日历" → "添加日历" → "订阅日历" → 粘贴链接</view>
+    </view>
+  </view>
+
+  <view class="section-title">Android</view>
+  <view class="step">
+    <view class="step-num">2</view>
+    <view class="step-content">
+      <view class="step-title">🤖 Android (Google Calendar)</view>
+      <view class="step-desc">打开 calendar.google.com → 设置 → 添加日历 → 通过 URL → 粘贴链接</view>
+    </view>
+  </view>
+
+  <view class="section-title">Outlook</view>
+  <view class="step">
+    <view class="step-num">3</view>
+    <view class="step-content">
+      <view class="step-title">📧 Outlook</view>
+      <view class="step-desc">打开 Outlook → "添加日历" → "从互联网" → 粘贴 ICS 链接</view>
+    </view>
+  </view>
+
+  <view class="section-title">macOS</view>
+  <view class="step">
+    <view class="step-num">4</view>
+    <view class="step-content">
+      <view class="step-title">🍏 macOS 日历</view>
+      <view class="step-desc">打开 "日历" → 文件 → 新建日历订阅 → 粘贴链接 → 确定</view>
+    </view>
+  </view>
+
+  <view class="section-title">Windows</view>
+  <view class="step">
+    <view class="step-num">5</view>
+    <view class="step-content">
+      <view class="step-title">🪟 Windows 邮件和日历</view>
+      <view class="step-desc">打开 "日历" → 设置 → 管理账户 → 高级设置 → 添加日历订阅 → 粘贴链接</view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <text>💡 订阅后日历会自动更新 | </text>
+    <text class="link" bindtap="goBack">返回首页</text>
+  </view>
+</view>

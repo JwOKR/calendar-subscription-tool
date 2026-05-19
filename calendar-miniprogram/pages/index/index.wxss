@@ -1,0 +1,20 @@
+.tutorial-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin: 15rpx 0;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+}
+
+.tutorial-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #667eea;
+  margin-bottom: 10rpx;
+}
+
+.tutorial-desc {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.6;
+}

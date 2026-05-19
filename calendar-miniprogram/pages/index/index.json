@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "日历订阅工具",
+  "usingComponents": {
+    "sub-card": "/components/sub-card/sub-card"
+  },
+  "enablePullDownRefresh": false
+}

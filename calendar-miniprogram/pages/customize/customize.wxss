@@ -1,0 +1,5 @@
+/* customize 页面样式 - 复用全局样式 */
+/* .form-group, .form-label, .form-input, .form-tip,
+   .checkbox-item, .radio-group, .radio-item,
+   .btn-copy, .result-card, .result-title, .url-box
+   等在 app.wxss 中已定义 */

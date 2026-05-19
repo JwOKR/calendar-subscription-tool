@@ -1,0 +1,22 @@
+<view class="sub-card {{badgeType === 'allinone' ? 'all-in-one' : ''}}">
+  <view class="card-header">
+    <view class="card-title">{{icon}} {{name}}</view>
+    <view wx:if="{{badge}}" class="badge {{badgeType === 'allinone' ? 'allinone' : ''}}">{{badge}}</view>
+  </view>
+  <view class="card-desc">{{desc}}</view>
+  <view wx:if="{{tags && tags.length > 0}}" class="tags">
+    <view wx:for="{{tags}}" wx:key="*this" class="tag">{{item}}</view>
+  </view>
+  <view class="url-group">
+    <view class="url-label">🎨 带图标版</view>
+    <view class="url-box" bindtap="onCopyIcon">
+      {{iconUrl}}
+    </view>
+  </view>
+  <view class="url-group">
+    <view class="url-label">📝 纯文字版</view>
+    <view class="url-box" bindtap="onCopyNoIcon">
+      {{noIconUrl}}
+    </view>
+  </view>
+</view>

@@ -1,0 +1,85 @@
+<view class="container">
+  <view class="header-card">
+    <view class="title">⚙️ 定制我的日历</view>
+    <view class="desc">填写配置，生成个性化订阅链接</view>
+  </view>
+
+  <!-- 自定义节假日 API -->
+  <view class="form-group">
+    <view class="form-label">📅 自定义节假日 API（可选）</view>
+    <input
+      class="form-input"
+      placeholder="例如：https://timor.tech/api/holiday/year/{year}"
+      value="{{holidayApi}}"
+      bindinput="onHolidayApiInput"
+    />
+    <view class="form-tip">留空使用默认 API。{year} 会被替换为年份。</view>
+  </view>
+
+  <!-- 订阅源选择 -->
+  <view class="form-group">
+    <view class="form-label">📋 选择要包含的订阅源</view>
+    <label class="checkbox-item">
+      <checkbox value="holidays" checked="{{sources.holidays}}" bindtap="toggleSource" data-key="holidays" />
+      🇨🇳 中国节假日（法定假日 + 调休）
+    </label>
+    <label class="checkbox-item">
+      <checkbox value="lunar" checked="{{sources.lunar}}" bindtap="toggleSource" data-key="lunar" />
+      🌙 农历日历
+    </label>
+    <label class="checkbox-item">
+      <checkbox value="solar" checked="{{sources.solar}}" bindtap="toggleSource" data-key="solar" />
+      ☀️ 二十四节气
+    </label>
+    <label class="checkbox-item">
+      <checkbox value="yiji" checked="{{sources.yiji}}" bindtap="toggleSource" data-key="yiji" />
+      📋 宜忌日历
+    </label>
+    <label class="checkbox-item">
+      <checkbox value="festivals" checked="{{sources.festivals}}" bindtap="toggleSource" data-key="festivals" />
+      🎉 普通节日
+    </label>
+  </view>
+
+  <!-- 年份范围 -->
+  <view class="form-group">
+    <view class="form-label">📅 年份范围</view>
+    <input
+      class="form-input"
+      placeholder="例如：2024-2027"
+      value="{{yearRange}}"
+      bindinput="onYearRangeInput"
+    />
+    <view class="form-tip">格式：起始年份-结束年份</view>
+  </view>
+
+  <!-- 图标显示 -->
+  <view class="form-group">
+    <view class="form-label">🎨 显示图标</view>
+    <radio-group class="radio-group" bindchange="onIconsChange">
+      <label class="radio-item">
+        <radio value="true" checked="{{icons === true}}" color="#667eea" />
+        显示 emoji 图标（🎉 元旦（假期））
+      </label>
+      <label class="radio-item">
+        <radio value="false" checked="{{icons === false}}" color="#667eea" />
+        不显示图标（元旦（假期））
+      </label>
+    </radio-group>
+  </view>
+
+  <!-- 生成按钮 -->
+  <button class="btn-copy" bindtap="generate">🚀 生成我的订阅链接</button>
+
+  <!-- 生成结果 -->
+  <view wx:if="{{resultUrl}}" class="result-card">
+    <view class="result-title">✅ 你的个性化订阅链接已生成！</view>
+    <view class="url-box" bindtap="copyResult">{{resultUrl}}</view>
+    <view class="form-tip" style="margin-top:10rpx;">💡 点击链接可复制 | 将链接粘贴到日历应用</view>
+  </view>
+
+  <view class="footer">
+    <text>💡 在日历应用中粘贴链接完成订阅 | </text>
+    <text class="link" bindtap="goBack">返回首页</text>
+  </view>
+</view>

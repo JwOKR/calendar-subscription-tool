@@ -1,0 +1,2 @@
+/* tutorial 页面样式 - 复用全局样式 */
+/* .step, .step-num, .step-content 等在 app.wxss 中已定义 */

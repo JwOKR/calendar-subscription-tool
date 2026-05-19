@@ -1,0 +1,43 @@
+<view class="container">
+  <!-- 头部 -->
+  <view class="header-card">
+    <view class="title">📅 日历订阅工具</view>
+    <view class="update-time">⚡ 静态文件，每天自动更新</view>
+    <view class="update-time">📅 覆盖 2021 ~ 2028 年</view>
+  </view>
+
+  <!-- CF Workers 入口 -->
+  <view class="workers-banner" bindtap="goCustomize">
+    🚀 想要更多定制选项？前往定制页 →
+  </view>
+
+  <!-- 订阅列表：动态渲染 -->
+  <block wx:for="{{subscriptions}}" wx:key="id">
+    <view class="section-title" wx:if="{{index === 0}}">🇨🇳 中国节假日 <text class="badge" wx:if="{{item.badge}}">{{item.badge}}</text></view>
+    <view class="section-title" wx:elif="{{index === 1}}">🌙 农历 · 节气 · 宜忌</view>
+    <view class="section-title" wx:elif="{{index === 4}}">🎉 节日 · 全能</view>
+
+    <sub-card
+      name="{{item.name}}"
+      icon="{{item.icon}}"
+      desc="{{item.desc}}"
+      badge="{{item.badge}}"
+      badgeType="{{item.badgeType}}"
+      sources="{{item.sources}}"
+      tags="{{item.tags}}"
+    ></sub-card>
+  </block>
+
+  <!-- 使用教程入口 -->
+  <view class="section-title">📱 使用教程</view>
+  <view class="tutorial-card" bindtap="goTutorial">
+    <view class="tutorial-title">📱 如何订阅日历？</view>
+    <view class="tutorial-desc">iOS / Android / Outlook 订阅方法 →</view>
+  </view>
+
+  <!-- 底部 -->
+  <view class="footer">
+    <text>⚡ 静态文件 | </text>
+    <text class="link" bindtap="goGitHub">GitHub 仓库</text>
+  </view>
+</view>
