@@ -227,12 +227,14 @@ page {
 
 .form-input {
   width: 100%;
+  min-height: 80rpx;
   padding: 16rpx 20rpx;
   border: 2rpx solid #e9ecef;
   border-radius: 12rpx;
   font-size: 28rpx;
   background: #f8f9fa;
   box-sizing: border-box;
+  line-height: 48rpx;
 }
 
 .form-tip {
