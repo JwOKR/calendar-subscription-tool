@@ -614,11 +614,11 @@ function renderHTML(origin) {
     <div class="copy-toast" id="copyToast">✅ 已复制到剪贴板！</div>
 
     <script>
-        let iconMode = 'no-icon';
+        let iconMode = 'noicon';
 
         function toggleIconMode() {
             const checked = document.getElementById('iconToggle').checked;
-            iconMode = checked ? 'icon' : 'no-icon';
+            iconMode = checked ? 'icon' : 'noicon';
             const label = iconMode === 'icon' ? '🎨 带图标版' : '📝 无图标版';
             document.getElementById('toggleText').textContent = label;
             document.querySelectorAll('.subscription-url[data-icon]').forEach(el => {
