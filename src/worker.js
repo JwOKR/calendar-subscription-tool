@@ -425,6 +425,7 @@ function renderHTML(origin) {
         .subscription-url:hover { background:#e7f0ff; border-color:#667eea; }
         .url-label { display:block; color:#999; font-size:12px; margin-bottom:4px; font-weight:500; }
         .badge { display:inline-block; background:#667eea; color:white; padding:3px 10px; border-radius:12px; font-size:11px; margin-left:8px; font-weight:600; vertical-align:middle; }
+        .version-label { font-size:13px; color:#999; font-weight:400; margin-left:6px; }
         .btn { display:inline-block; padding:14px 32px; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; transition:all 0.2s; cursor:pointer; border:none; }
         .btn-primary { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; box-shadow:0 4px 12px rgba(102,126,234,0.4); }
         .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(102,126,234,0.5); }
@@ -490,7 +491,7 @@ function renderHTML(origin) {
             <!-- 🃏 推荐 -->
             <div class="section-title">🃏 推荐</div>
             <div class="card allinone">
-                <h3>🚀 全能日历 <span class="badge" style="background:#48bb78;">ALL-IN-ONE</span></h3>
+                <h3>🚀 全能日历 <span class="version-label">（无图标版）</span> <span class="badge" style="background:#48bb78;">ALL-IN-ONE</span></h3>
                 <p>合并所有日历源，一个订阅搞定所有</p>
                 <div class="merge-tags">
                     <span class="merge-tag">🇨🇳 中国节假日</span>
@@ -505,7 +506,7 @@ function renderHTML(origin) {
             <!-- 📋 宜忌日历 -->
             <div class="section-title">📋 宜忌日历</div>
             <div class="card">
-                <h3>📋 宜忌日历</h3>
+                <h3>📋 宜忌日历 <span class="version-label">（无图标版）</span></h3>
                 <p>每日宜忌 + 吉神凶煞（传统黄历）</p>
                 <div class="url-label" id="label-yiji">📝 无图标版</div>
                 <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=yiji" data-noicon="${repoUrl}?sources=yiji&icons=false">${repoUrl}?sources=yiji&icons=false</div>
@@ -514,25 +515,25 @@ function renderHTML(origin) {
             <!-- 🇨🇳 中国节假日 · 农历 · 节气 · 节日 -->
             <div class="section-title">🇨🇳 中国节假日 · 农历 · 节气 · 节日</div>
             <div class="card">
-                <h3>🇨🇳 中国节假日</h3>
+                <h3>🇨🇳 中国节假日 <span class="version-label">（无图标版）</span></h3>
                 <p>国务院办公厅发布的法定节假日 + 调休安排</p>
                 <div class="url-label" id="label-holidays">📝 无图标版</div>
                 <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=holidays" data-noicon="${repoUrl}?sources=holidays&icons=false">${repoUrl}?sources=holidays&icons=false</div>
             </div>
             <div class="card">
-                <h3>🌙 农历日历</h3>
+                <h3>🌙 农历日历 <span class="version-label">（无图标版）</span></h3>
                 <p>农历日期 + 传统节日（春节、中秋、端午等）</p>
                 <div class="url-label" id="label-lunar">📝 无图标版</div>
                 <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=lunar" data-noicon="${repoUrl}?sources=lunar&icons=false">${repoUrl}?sources=lunar&icons=false</div>
             </div>
             <div class="card">
-                <h3>☀️ 二十四节气</h3>
+                <h3>☀️ 二十四节气 <span class="version-label">（无图标版）</span></h3>
                 <p>完整二十四节气，精准到分钟</p>
                 <div class="url-label" id="label-solar">📝 无图标版</div>
                 <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=solar" data-noicon="${repoUrl}?sources=solar&icons=false">${repoUrl}?sources=solar&icons=false</div>
             </div>
             <div class="card">
-                <h3>🎉 普通节日</h3>
+                <h3>🎉 普通节日 <span class="version-label">（无图标版）</span></h3>
                 <p>公历节日 + 国际节日 + 动态日期节日</p>
                 <div class="url-label" id="label-festivals">📝 无图标版</div>
                 <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=festivals" data-noicon="${repoUrl}?sources=festivals&icons=false">${repoUrl}?sources=festivals&icons=false</div>
@@ -626,6 +627,10 @@ function renderHTML(origin) {
             });
             document.querySelectorAll('[id^="label-"]').forEach(el => {
                 el.textContent = label;
+            });
+            // 更新所有卡片标题的版本标签
+            document.querySelectorAll('.version-label').forEach(el => {
+                el.textContent = iconMode === 'icon' ? '（带图标版）' : '（无图标版）';
             });
         }
 

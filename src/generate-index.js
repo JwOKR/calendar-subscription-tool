@@ -52,7 +52,7 @@ function card(id, icon, title, desc, fileBase, preview) {
     ? `                <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>\n                <div class="preview-content">\n${preview}\n                </div>`
     : '';
   return `            <div class="card">
-                <h3>${icon} ${title}</h3>
+                <h3>${icon} ${title} <span class="version-label">（无图标版）</span></h3>
                 <p>${desc}</p>
                 ${singleLink(fileBase)}
 ${previewHtml}
@@ -83,6 +83,7 @@ const html = `<!DOCTYPE html>
         .subscription-url:hover { background:#e7f0ff; border-color:#667eea; }
         .url-label { display:block; color:#999; font-size:12px; margin-bottom:4px; font-weight:500; }
         .badge { display:inline-block; background:#667eea; color:white; padding:3px 10px; border-radius:12px; font-size:11px; margin-left:8px; font-weight:600; vertical-align:middle; }
+        .version-label { font-size:13px; color:#999; font-weight:400; margin-left:6px; }
         .btn { display:inline-block; padding:14px 32px; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; transition:all 0.2s; cursor:pointer; border:none; }
         .btn-primary { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; box-shadow:0 4px 12px rgba(102,126,234,0.4); }
         .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(102,126,234,0.5); }
@@ -181,7 +182,7 @@ const html = `<!DOCTYPE html>
             <!-- 🃏 推荐 -->
             <div class="section-title">🃏 推荐</div>
             <div class="card a-allinone">
-                <h3>🚀 全能日历 <span class="badge" style="background:#48bb78;">ALL-IN-ONE</span></h3>
+                <h3>🚀 全能日历 <span class="version-label">（无图标版）</span> <span class="badge" style="background:#48bb78;">ALL-IN-ONE</span></h3>
                 <p>合并所有日历源，一个订阅搞定所有</p>
                 <div class="merge-tags">
                     <span class="merge-tag">🇨🇳 中国节假日</span>
@@ -388,6 +389,10 @@ const html = `<!DOCTYPE html>
             });
             document.querySelectorAll('[id^="label-"]').forEach(el => {
                 el.textContent = label;
+            });
+            // 更新所有卡片标题的版本标签
+            document.querySelectorAll('.version-label').forEach(el => {
+                el.textContent = iconMode === 'icon' ? '（带图标版）' : '（无图标版）';
             });
         }
 
