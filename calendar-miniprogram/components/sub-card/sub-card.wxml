@@ -7,16 +7,11 @@
   <view wx:if="{{tags && tags.length > 0}}" class="tags">
     <view wx:for="{{tags}}" wx:key="*this" class="tag">{{item}}</view>
   </view>
+  <!-- 只显示一个版本的链接 -->
   <view class="url-group">
-    <view class="url-label">🎨 带图标版</view>
-    <view class="url-box" bindtap="onCopyIcon">
-      {{iconUrl}}
-    </view>
-  </view>
-  <view class="url-group">
-    <view class="url-label">📝 纯文字版</view>
-    <view class="url-box" bindtap="onCopyNoIcon">
-      {{noIconUrl}}
+    <view class="url-label">{{linkLabel}}</view>
+    <view class="url-box" bindtap="onCopyUrl">
+      {{displayUrl}}
     </view>
   </view>
 </view>

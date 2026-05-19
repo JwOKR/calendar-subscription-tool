@@ -6,6 +6,16 @@
     <view class="update-time">📅 覆盖 2021 ~ 2028 年</view>
   </view>
 
+  <!-- 图标版本切换 -->
+  <view class="mode-switch">
+    <view class="switch-label">订阅版本：</view>
+    <view class="switch-track {{iconMode === 'noicon' ? 'track-noicon' : 'track-icon'}}" bindtap="switchIconMode">
+      <view class="switch-thumb {{iconMode === 'noicon' ? 'thumb-left' : 'thumb-right'}}">
+        {{iconMode === 'noicon' ? '📝 无图标' : '🎨 带图标'}}
+      </view>
+    </view>
+  </view>
+
   <!-- CF Workers 入口 -->
   <view class="workers-banner" bindtap="goCustomize">
     🚀 想要更多定制选项？前往定制页 →
@@ -13,9 +23,10 @@
 
   <!-- 订阅列表：动态渲染 -->
   <block wx:for="{{subscriptions}}" wx:key="id">
-    <view class="section-title" wx:if="{{index === 0}}">🇨🇳 中国节假日 <text class="badge" wx:if="{{item.badge}}">{{item.badge}}</text></view>
-    <view class="section-title" wx:elif="{{index === 1}}">🌙 农历 · 节气 · 宜忌</view>
-    <view class="section-title" wx:elif="{{index === 4}}">🎉 节日 · 全能</view>
+    <!-- 分区标题：仅该 section 首个卡片显示 -->
+    <view wx:if="{{sectionMeta[index] && sectionMeta[index].show}}" class="section-title">
+      {{sectionMeta[index].title}}
+    </view>
 
     <sub-card
       name="{{item.name}}"
@@ -25,6 +36,7 @@
       badgeType="{{item.badgeType}}"
       sources="{{item.sources}}"
       tags="{{item.tags}}"
+      iconMode="{{iconMode}}"
     ></sub-card>
   </block>
 

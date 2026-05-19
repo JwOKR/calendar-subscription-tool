@@ -6,43 +6,45 @@ Component({
     badge: { type: String, value: '' },
     badgeType: { type: String, value: '' },
     tags: { type: Array, value: [] },
-    sources: { type: String, value: '' }
+    sources: { type: String, value: '' },
+    // 'icon' = 带图标版，'noicon' = 无图标版
+    iconMode: { type: String, value: 'noicon' }
   },
 
   data: {
-    iconUrl: '',
-    noIconUrl: ''
+    displayUrl: '',
+    linkLabel: ''
   },
 
   lifetimes: {
     attached() {
-      const app = getApp();
-      const base = app.globalData.githubPagesBase;
-      const sources = this.properties.sources;
-      this.setData({
-        iconUrl: `${base}/${sources}.ics`,
-        noIconUrl: `${base}/${sources}-noicon.ics`
-      });
+      this.updateUrl();
+    },
+    detached() {}
+  },
+
+  observers: {
+    'sources, iconMode': function () {
+      this.updateUrl();
     }
   },
 
   methods: {
-    onCopyIcon() {
-      const url = this.data.iconUrl;
-      wx.setClipboardData({
-        data: url,
-        success() {
-          wx.showToast({ title: '带图标版链接已复制', icon: 'success' });
-        }
-      });
+    updateUrl() {
+      const app = getApp();
+      const base = app.globalData.githubPagesBase;
+      const { sources, iconMode } = this.properties;
+      const suffix = iconMode === 'icon' ? '' : '-noicon';
+      const url = `${base}/${sources}${suffix}.ics`;
+      const label = iconMode === 'icon' ? '🎨 带图标版' : '📝 无图标版';
+      this.setData({ displayUrl: url, linkLabel: label });
     },
 
-    onCopyNoIcon() {
-      const url = this.data.noIconUrl;
+    onCopyUrl() {
       wx.setClipboardData({
-        data: url,
+        data: this.data.displayUrl,
         success() {
-          wx.showToast({ title: '纯文字版链接已复制', icon: 'success' });
+          wx.showToast({ title: '链接已复制', icon: 'success' });
         }
       });
     }

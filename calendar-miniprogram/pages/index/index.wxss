@@ -1,3 +1,67 @@
+/* 图标版本切换开关 */
+.mode-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 30rpx;
+  margin: 20rpx 0;
+  background: white;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+}
+
+.switch-label {
+  font-size: 26rpx;
+  color: #333;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.switch-track {
+  display: flex;
+  align-items: center;
+  width: 250rpx;
+  height: 64rpx;
+  border-radius: 32rpx;
+  padding: 4rpx;
+  transition: background 0.3s;
+  position: relative;
+}
+
+.track-noicon {
+  background: #667eea;
+}
+
+.track-icon {
+  background: #f093fb;
+}
+
+.switch-thumb {
+  height: 56rpx;
+  border-radius: 28rpx;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  color: #333;
+  transition: all 0.3s;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.15);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.thumb-left {
+  width: 150rpx;
+  margin-right: 100rpx;
+}
+
+.thumb-right {
+  width: 150rpx;
+  margin-left: 100rpx;
+}
+
+/* 教程卡片 */
 .tutorial-card {
   background: white;
   border-radius: 16rpx;
