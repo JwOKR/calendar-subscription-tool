@@ -191,10 +191,11 @@ async function mergeFromConfig({ fileSuffix = '' } = {}) {
     output = `${base}${fileSuffix}${ext}`;
   }
 
+  const versionSuffix = fileSuffix === '-noicon' ? '（无图标版）' : '（带图标版）';
   return await mergeSources({
     sources,
     output,
-    calName: config.mergeCalName || '合并日历',
+    calName: (config.mergeCalName || '合并日历') + versionSuffix,
     calDesc: config.mergeCalDesc || '多个日历源合并',
   });
 }

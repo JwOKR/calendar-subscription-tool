@@ -121,12 +121,13 @@ function writeICS({ filename, calName, calDesc, events, color, stripEmoji }) {
  */
 function generateAllICS(allData, { stripEmoji = false, fileSuffix = '' } = {}) {
   const files = [];
+  const versionSuffix = fileSuffix === '-noicon' ? '（无图标版）' : '（带图标版）';
 
   // 1. 节假日 + 调休
   if (allData.holidayEvents && allData.holidayEvents.length > 0) {
     files.push(writeICS({
       filename: `china-holidays${fileSuffix}.ics`,
-      calName: '中国节假日·调休',
+      calName: '中国节假日·调休' + versionSuffix,
       calDesc: '中国法定节假日与调休安排（数据源：timor.tech）',
       events: allData.holidayEvents,
       color: '#E74C3C',
@@ -138,7 +139,7 @@ function generateAllICS(allData, { stripEmoji = false, fileSuffix = '' } = {}) {
   if (allData.lunarEvents && allData.lunarEvents.length > 0) {
     files.push(writeICS({
       filename: `lunar-calendar${fileSuffix}.ics`,
-      calName: '农历日期',
+      calName: '农历日期' + versionSuffix,
       calDesc: '农历初一及农历节日提醒（本地计算）',
       events: allData.lunarEvents,
       color: '#8E44AD',
@@ -150,7 +151,7 @@ function generateAllICS(allData, { stripEmoji = false, fileSuffix = '' } = {}) {
   if (allData.solarTermEvents && allData.solarTermEvents.length > 0) {
     files.push(writeICS({
       filename: `solar-terms${fileSuffix}.ics`,
-      calName: '二十四节气',
+      calName: '二十四节气' + versionSuffix,
       calDesc: '中国二十四节气（本地计算）',
       events: allData.solarTermEvents,
       color: '#27AE60',
@@ -162,7 +163,7 @@ function generateAllICS(allData, { stripEmoji = false, fileSuffix = '' } = {}) {
   if (allData.yiJiEvents && allData.yiJiEvents.length > 0) {
     files.push(writeICS({
       filename: `yi-ji${fileSuffix}.ics`,
-      calName: '每日宜忌',
+      calName: '每日宜忌' + versionSuffix,
       calDesc: '老黄历每日宜忌（本地计算）',
       events: allData.yiJiEvents,
       color: '#F39C12',
@@ -174,7 +175,7 @@ function generateAllICS(allData, { stripEmoji = false, fileSuffix = '' } = {}) {
   if (allData.festivalEvents && allData.festivalEvents.length > 0) {
     files.push(writeICS({
       filename: `festivals${fileSuffix}.ics`,
-      calName: '普通节日',
+      calName: '普通节日' + versionSuffix,
       calDesc: '中国公历节日、国际节日及动态日期节日（本地计算）',
       events: allData.festivalEvents,
       color: '#E67E22',

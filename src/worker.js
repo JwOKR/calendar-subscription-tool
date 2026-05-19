@@ -278,7 +278,8 @@ async function generateCalendar({ sources, holidayApi, year, icons = true }) {
     endYear = current + 2;
   }
 
-  const cal = new ICalCalendar({ name: `定制日历 ${startYear}-${endYear}` });
+  const versionSuffix = icons ? '（带图标版）' : '（无图标版）';
+  const cal = new ICalCalendar({ name: `定制日历 ${startYear}-${endYear}${versionSuffix}` });
   const collector = createEventCollector();
 
   // 1. 节假日
