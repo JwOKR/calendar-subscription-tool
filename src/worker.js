@@ -420,9 +420,10 @@ function renderHTML(origin) {
         .card:hover { transform:translateX(6px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
         .card h3 { color:#333; margin-bottom:8px; font-size:17px; }
         .card p { color:#666; font-size:14px; margin-bottom:14px; line-height:1.5; }
-        .card.a-allinone { border-left-color:#48bb78; background:linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); }
+        .card.allinone { border-left-color:#48bb78; background:linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); }
         .subscription-url { background:#f8f9fa; border:2px solid #e9ecef; border-radius:10px; padding:12px 16px; font-family:'Courier New',monospace; font-size:13px; color:#667eea; word-break:break-all; cursor:pointer; transition:all 0.2s; user-select:all; }
         .subscription-url:hover { background:#e7f0ff; border-color:#667eea; }
+        .url-label { display:block; color:#999; font-size:12px; margin-bottom:4px; font-weight:500; }
         .badge { display:inline-block; background:#667eea; color:white; padding:3px 10px; border-radius:12px; font-size:11px; margin-left:8px; font-weight:600; vertical-align:middle; }
         .btn { display:inline-block; padding:14px 32px; border-radius:12px; text-decoration:none; font-weight:600; font-size:15px; transition:all 0.2s; cursor:pointer; border:none; }
         .btn-primary { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; box-shadow:0 4px 12px rgba(102,126,234,0.4); }
@@ -443,6 +444,19 @@ function renderHTML(origin) {
         .copy-toast.show { transform:translateX(-50%) translateY(0); }
         .footer { text-align:center; color:rgba(255,255,255,0.8); font-size:13px; margin-top:30px; padding-bottom:20px; }
         .footer a { color:white; text-decoration:underline; }
+        .icon-toggle { display:flex; align-items:center; justify-content:center; gap:16px; background:white; border-radius:16px; padding:16px 24px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+        .toggle-label { font-size:15px; color:#333; font-weight:500; }
+        .toggle-switch { position:relative; width:56px; height:30px; cursor:pointer; display:inline-block; flex-shrink:0; }
+        .toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
+        .toggle-track { position:absolute; inset:0; border-radius:30px; transition:background 0.3s; }
+        .toggle-dot { position:absolute; top:3px; width:24px; height:24px; border-radius:50%; background:white; box-shadow:0 2px 4px rgba(0,0,0,0.2); transition:left 0.3s; }
+        .toggle-switch input:not(:checked) ~ .toggle-track { background:#667eea; }
+        .toggle-switch input:checked ~ .toggle-track { background:#f093fb; }
+        .toggle-switch input:not(:checked) ~ .toggle-dot { left:3px; }
+        .toggle-switch input:checked ~ .toggle-dot { left:29px; }
+        .toggle-text { font-size:13px; color:#666; min-width:70px; text-align:center; }
+        .merge-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+        .merge-tag { background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600; }
     </style>
 </head>
 <body>
@@ -451,6 +465,17 @@ function renderHTML(origin) {
         <div class="header-card">
             <h1>📅 日历订阅源</h1>
             <div class="update-time">⚡ 由 Cloudflare Workers 动态生成</div>
+        </div>
+
+        <!-- 图标版本切换 -->
+        <div class="icon-toggle">
+            <span class="toggle-text" id="toggleText">📝 无图标版</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="iconToggle" onchange="toggleIconMode()">
+                <span class="toggle-track"></span>
+                <span class="toggle-dot"></span>
+            </label>
+            <span class="toggle-label">订阅版本</span>
         </div>
 
         <!-- 标签栏 -->
@@ -462,55 +487,55 @@ function renderHTML(origin) {
 
         <!-- 订阅标签页 -->
         <div id="tab-subscribe" class="tab-content active">
-            <div style="background:white; border-radius:12px; padding:14px 20px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-                <span style="color:#333; font-weight:600; font-size:15px;">🎨 事件名称显示图标</span>
-                <label style="position:relative; display:inline-block; width:48px; height:26px; cursor:pointer;">
-                    <input type="checkbox" id="globalIconsToggle" checked style="opacity:0; width:0; height:0;" onchange="toggleIcons()">
-                    <span style="position:absolute; inset:0; background:#ccc; border-radius:26px; transition:0.3s;"></span>
-                    <span id="toggleDot" style="position:absolute; left:3px; top:3px; width:20px; height:20px; background:white; border-radius:50%; transition:0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.2); transform:translateX(22px);"></span>
-                </label>
+            <!-- 🃏 推荐 -->
+            <div class="section-title">🃏 推荐</div>
+            <div class="card allinone">
+                <h3>🚀 全能日历 <span class="badge" style="background:#48bb78;">ALL-IN-ONE</span></h3>
+                <p>合并所有日历源，一个订阅搞定所有</p>
+                <div class="merge-tags">
+                    <span class="merge-tag">🇨🇳 中国节假日</span>
+                    <span class="merge-tag">🌙 农历日历</span>
+                    <span class="merge-tag">☀️ 二十四节气</span>
+                    <span class="merge-tag">🎉 普通节日</span>
+                </div>
+                <div class="url-label" id="label-all-in-one">📝 无图标版</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=holidays,lunar,solar,festivals" data-noicon="${repoUrl}?sources=holidays,lunar,solar,festivals&icons=false">${repoUrl}?sources=holidays,lunar,solar,festivals&icons=false</div>
             </div>
 
-            <div class="section-title">🇨🇳 中国节假日 <span class="badge">推荐</span></div>
+            <!-- 📋 宜忌日历 -->
+            <div class="section-title">📋 宜忌日历</div>
+            <div class="card">
+                <h3>📋 宜忌日历</h3>
+                <p>每日宜忌 + 吉神凶煞（传统黄历）</p>
+                <div class="url-label" id="label-yiji">📝 无图标版</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=yiji" data-noicon="${repoUrl}?sources=yiji&icons=false">${repoUrl}?sources=yiji&icons=false</div>
+            </div>
+
+            <!-- 🇨🇳 中国节假日 · 农历 · 节气 · 节日 -->
+            <div class="section-title">🇨🇳 中国节假日 · 农历 · 节气 · 节日</div>
             <div class="card">
                 <h3>🇨🇳 中国节假日</h3>
                 <p>国务院办公厅发布的法定节假日 + 调休安排</p>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}?sources=holidays</div>
+                <div class="url-label" id="label-holidays">📝 无图标版</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=holidays" data-noicon="${repoUrl}?sources=holidays&icons=false">${repoUrl}?sources=holidays&icons=false</div>
             </div>
-
-            <div class="section-title">🌙 农历 · 节气 · 宜忌</div>
             <div class="card">
                 <h3>🌙 农历日历</h3>
                 <p>农历日期 + 传统节日（春节、中秋、端午等）</p>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}?sources=lunar</div>
+                <div class="url-label" id="label-lunar">📝 无图标版</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=lunar" data-noicon="${repoUrl}?sources=lunar&icons=false">${repoUrl}?sources=lunar&icons=false</div>
             </div>
             <div class="card">
                 <h3>☀️ 二十四节气</h3>
                 <p>完整二十四节气，精准到分钟</p>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}?sources=solar</div>
+                <div class="url-label" id="label-solar">📝 无图标版</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=solar" data-noicon="${repoUrl}?sources=solar&icons=false">${repoUrl}?sources=solar&icons=false</div>
             </div>
-            <div class="card">
-                <h3>📋 宜忌日历</h3>
-                <p>每日宜忌 + 吉神凶煞（传统黄历）</p>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}?sources=yiji</div>
-            </div>
-
-            <div class="section-title">🎉 节日 · 全能</div>
             <div class="card">
                 <h3>🎉 普通节日</h3>
                 <p>公历节日 + 国际节日 + 动态日期节日</p>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}?sources=festivals</div>
-            </div>
-            <div class="card a-allinone">
-                <h3>🚀 全能日历 <span class="badge" style="background:#48bb78;">ALL-IN-ONE</span></h3>
-                <p>合并所有日历源，一个订阅搞定所有</p>
-                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;">
-                    <span style="background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600;">🇨🇳 中国节假日</span>
-                    <span style="background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600;">🌙 农历日历</span>
-                    <span style="background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600;">☀️ 二十四节气</span>
-                    <span style="background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600;">🎉 普通节日</span>
-                </div>
-                <div class="subscription-url" onclick="copyToClipboard(this)">${repoUrl}?sources=holidays,lunar,solar,festivals</div>
+                <div class="url-label" id="label-festivals">📝 无图标版</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=festivals" data-noicon="${repoUrl}?sources=festivals&icons=false">${repoUrl}?sources=festivals&icons=false</div>
             </div>
         </div>
 
@@ -519,57 +544,35 @@ function renderHTML(origin) {
             <div class="guide-card">
                 <h2>⚙️ 定制我的日历</h2>
                 <p style="color:#666; margin-bottom:24px; line-height:1.6;">填写以下配置，生成属于你的个性化日历订阅链接：</p>
-                
-                <!-- 配置表单 -->
                 <div style="background:#f8f9fa; padding:20px; border-radius:12px; margin-bottom:20px;">
                     <div style="margin-bottom:16px;">
                         <label style="display:block; color:#333; font-weight:600; margin-bottom:6px;">📡 自定义节假日 API（可选）</label>
                         <input type="text" id="holidayApi" placeholder="例如：https://timor.tech/api/holiday/year/{year}" value="https://timor.tech/api/holiday/year/{year}" style="width:100%; padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
                         <small style="color:#999; margin-top:4px; display:block;">留空使用默认 API。{year} 会被替换为年份。</small>
                     </div>
-                    
                     <div style="margin-bottom:16px;">
                         <label style="display:block; color:#333; font-weight:600; margin-bottom:8px;">📋 选择要包含的订阅源</label>
-                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
-                            <input type="checkbox" id="src-holidays" checked style="margin-right:8px;"> 🇨🇳 中国节假日（法定假日 + 调休）
-                        </label>
-                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
-                            <input type="checkbox" id="src-lunar" checked style="margin-right:8px;"> 🌙 农历日历
-                        </label>
-                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
-                            <input type="checkbox" id="src-solar" checked style="margin-right:8px;"> ☀️ 二十四节气
-                        </label>
-                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
-                            <input type="checkbox" id="src-yiji" style="margin-right:8px;"> 📋 宜忌日历
-                        </label>
-                        <label style="display:block; margin-bottom:8px; cursor:pointer;">
-                            <input type="checkbox" id="src-festivals" checked style="margin-right:8px;"> 🎉 普通节日
-                        </label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;"><input type="checkbox" id="src-holidays" checked style="margin-right:8px;"> 🇨🇳 中国节假日（法定假日 + 调休）</label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;"><input type="checkbox" id="src-lunar" checked style="margin-right:8px;"> 🌙 农历日历</label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;"><input type="checkbox" id="src-solar" checked style="margin-right:8px;"> ☀️ 二十四节气</label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;"><input type="checkbox" id="src-yiji" style="margin-right:8px;"> 📋 宜忌日历</label>
+                        <label style="display:block; margin-bottom:8px; cursor:pointer;"><input type="checkbox" id="src-festivals" checked style="margin-right:8px;"> 🎉 普通节日</label>
                     </div>
-                    
                     <div style="margin-bottom:16px;">
                         <label style="display:block; color:#333; font-weight:600; margin-bottom:6px;">📅 年份范围</label>
                         <input type="text" id="yearRange" value="2024-2027" placeholder="例如：2024-2027" style="width:200px; padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
                     </div>
-
                     <div style="margin-bottom:16px;">
                         <label style="display:block; color:#333; font-weight:600; margin-bottom:8px;">🎨 显示图标</label>
-                        <label style="display:inline-flex; align-items:center; cursor:pointer; margin-right:20px;">
-                            <input type="radio" name="icons" value="true" checked style="margin-right:6px;"> 显示 emoji 图标（🎉 元旦（假期））
-                        </label>
-                        <label style="display:inline-flex; align-items:center; cursor:pointer;">
-                            <input type="radio" name="icons" value="false" style="margin-right:6px;"> 不显示图标（元旦（假期））
-                        </label>
+                        <label style="display:inline-flex; align-items:center; cursor:pointer; margin-right:20px;"><input type="radio" name="icons" value="true" checked style="margin-right:6px;"> 显示 emoji 图标</label>
+                        <label style="display:inline-flex; align-items:center; cursor:pointer;"><input type="radio" name="icons" value="false" style="margin-right:6px;"> 不显示图标</label>
                     </div>
-                    
                     <button onclick="generateCustomSubscription()" class="btn btn-primary" style="width:100%;">🚀 生成我的订阅链接</button>
                 </div>
-                
-                <!-- 生成的订阅链接 -->
                 <div id="custom-result" style="display:none; background:linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%); padding:20px; border-radius:12px; border-left:5px solid #48bb78;">
                     <h4 style="color:#2f855a; margin-bottom:10px;">✅ 你的个性化订阅链接已生成！</h4>
-                    <div class="subscription-url" id="custom-url" onclick="copyToClipboard(this)" style="margin-bottom:12px;"></div>
-                    <p style="color:#666; font-size:13px;">💡 将此链接添加到你的日历应用（iOS 日历、Google Calendar、Outlook 等）</p>
+                    <div class="subscription-url" id="custom-url" onclick="copyUrl(this)"></div>
+                    <p style="color:#666; font-size:13px; margin-top:8px;">💡 将此链接添加到你的日历应用（iOS 日历、Google Calendar、Outlook 等）</p>
                 </div>
             </div>
         </div>
@@ -578,7 +581,6 @@ function renderHTML(origin) {
         <div id="tab-guide" class="tab-content">
             <div class="guide-card">
                 <h2>📱 如何订阅日历？</h2>
-
                 <div class="step">
                     <div class="step-num">1</div>
                     <div class="step-content">
@@ -586,15 +588,13 @@ function renderHTML(origin) {
                         <p>打开 "日历" 应用 → 点击 "日历" → "添加日历" → "订阅日历" → 粘贴链接</p>
                     </div>
                 </div>
-
                 <div class="step">
                     <div class="step-num">2</div>
                     <div class="step-content">
-                        <h4>🤖 Android (Google Calendar)</h4>
-                        <p>打开 <a href="https://calendar.google.com" target="_blank">calendar.google.com</a> → 设置 → 添加日历 → 通过 URL → 粘贴链接</p>
+                        <h4>🖥️ Android (Google Calendar)</h4>
+                        <p>打开 calendar.google.com → 设置 → 添加日历 → 通过 URL → 粘贴链接</p>
                     </div>
                 </div>
-
                 <div class="step">
                     <div class="step-num">3</div>
                     <div class="step-content">
@@ -614,38 +614,18 @@ function renderHTML(origin) {
     <div class="copy-toast" id="copyToast">✅ 已复制到剪贴板！</div>
 
     <script>
-        const BASE_API = '${repoUrl}';
-        const SUBSCRIBE_URLS = [
-            { sources: 'holidays' },
-            { sources: 'lunar' },
-            { sources: 'solar' },
-            { sources: 'yiji' },
-            { sources: 'festivals' },
-            { sources: 'holidays,lunar,solar,festivals' },
-        ];
+        let iconMode = 'no-icon';
 
-        function toggleIcons() {
-            const checked = document.getElementById('globalIconsToggle').checked;
-            const dot = document.getElementById('toggleDot');
-            const track = dot.previousElementSibling;
-            if (checked) {
-                dot.style.transform = 'translateX(22px)';
-                track.style.background = '#667eea';
-            } else {
-                dot.style.transform = 'translateX(0)';
-                track.style.background = '#ccc';
-            }
-            updateSubscribeUrls(checked);
-        }
-
-        function updateSubscribeUrls(showIcons) {
-            const urls = document.querySelectorAll('#tab-subscribe .subscription-url');
-            urls.forEach((el, i) => {
-                if (i < SUBSCRIBE_URLS.length) {
-                    let url = BASE_API + '?sources=' + SUBSCRIBE_URLS[i].sources;
-                    if (!showIcons) url += '&icons=false';
-                    el.textContent = url;
-                }
+        function toggleIconMode() {
+            const checked = document.getElementById('iconToggle').checked;
+            iconMode = checked ? 'icon' : 'no-icon';
+            const label = iconMode === 'icon' ? '🎨 带图标版' : '📝 无图标版';
+            document.getElementById('toggleText').textContent = label;
+            document.querySelectorAll('.subscription-url[data-icon]').forEach(el => {
+                el.textContent = el.dataset[iconMode];
+            });
+            document.querySelectorAll('[id^="label-"]').forEach(el => {
+                el.textContent = label;
             });
         }
 
@@ -663,7 +643,8 @@ function renderHTML(origin) {
                 document.getElementById('tab-guide').classList.add('active');
             }
         }
-        function copyToClipboard(element) {
+
+        function copyUrl(element) {
             const text = element.textContent;
             navigator.clipboard.writeText(text).then(() => {
                 const toast = document.getElementById('copyToast');
@@ -671,38 +652,21 @@ function renderHTML(origin) {
                 setTimeout(() => toast.classList.remove('show'), 2000);
             });
         }
-        // 初始化：开关默认开启（蓝色）
-        document.getElementById('globalIconsToggle').nextElementSibling.style.background = '#667eea';
+
         function generateCustomSubscription() {
             const holidayApi = document.getElementById('holidayApi').value.trim();
             const yearRange = document.getElementById('yearRange').value.trim();
-            
-            // 获取选中的订阅源
             const sources = [];
             if (document.getElementById('src-holidays').checked) sources.push('holidays');
             if (document.getElementById('src-lunar').checked) sources.push('lunar');
             if (document.getElementById('src-solar').checked) sources.push('solar');
             if (document.getElementById('src-yiji').checked) sources.push('yiji');
             if (document.getElementById('src-festivals').checked) sources.push('festivals');
-            
-            if (sources.length === 0) {
-                alert('请至少选择一个订阅源！');
-                return;
-            }
-            
-            // 构建 API URL
+            if (sources.length === 0) { alert('请至少选择一个订阅源！'); return; }
             let apiUrl = '/api/calendar?sources=' + sources.join(',');
-            if (holidayApi) {
-                apiUrl += '&holidayApi=' + encodeURIComponent(holidayApi);
-            }
-            if (yearRange) {
-                apiUrl += '&year=' + encodeURIComponent(yearRange);
-            }
-            if (document.querySelector('input[name="icons"]:checked').value === 'false') {
-                apiUrl += '&icons=false';
-            }
-            
-            // 显示结果
+            if (holidayApi) apiUrl += '&holidayApi=' + encodeURIComponent(holidayApi);
+            if (yearRange) apiUrl += '&year=' + encodeURIComponent(yearRange);
+            if (document.querySelector('input[name="icons"]:checked').value === 'false') apiUrl += '&icons=false';
             const resultDiv = document.getElementById('custom-result');
             const urlDiv = document.getElementById('custom-url');
             urlDiv.textContent = window.location.origin + apiUrl;
