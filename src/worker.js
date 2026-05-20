@@ -261,6 +261,144 @@ function createEventCollector() {
   };
 }
 
+// ===== 预览端点处理 =====
+
+async function handlePreviewRequest(searchParams, corsHeaders) {
+  const sources = searchParams.get('sources');
+  const holidayApi = searchParams.get('holidayApi');
+  const year = searchParams.get('year');
+  const limitStr = searchParams.get('limit');
+
+  const sourceList = sources
+    ? sources.split(',').map(s => s.trim().toLowerCase())
+    : ['holidays', 'lunar', 'solar', 'festivals'];
+
+  const validSources = ['holidays', 'lunar', 'solar', 'yiji', 'festivals'];
+  const filtered = sourceList.filter(s => validSources.includes(s));
+
+  if (filtered.length === 0) {
+    return new Response(JSON.stringify({ error: '至少需要一个有效的 sources 参数' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+
+  const limit = limitStr ? parseInt(limitStr, 10) : 50;
+
+  try {
+    const current = dayjs().year();
+    let startYear, endYear;
+
+    if (year) {
+      if (year.includes('-')) {
+        [startYear, endYear] = year.split('-').map(Number);
+      } else {
+        startYear = endYear = Number(year);
+      }
+    } else {
+      startYear = current;
+      endYear = current + 2;
+    }
+
+    const allEvents = [];
+
+    // 1. 节假日
+    if (filtered.includes('holidays')) {
+      try {
+        const years = [];
+        for (let y = startYear; y <= endYear; y++) years.push(y);
+
+        const holidaysData = {};
+        for (const y of years) {
+          holidaysData[y] = await fetchYearHolidays(y, holidayApi || null);
+        }
+
+        const events = flattenHolidays(holidaysData, true);
+        allEvents.push(...events);
+      } catch (e) {
+        console.error('[preview] 节假日抓取失败：', e.message);
+      }
+    }
+
+    // 2. 农历 + 节气 + 宜忌
+    const { calcLunarEventsByYears } = await getLunarCalc();
+    const lunarData = calcLunarEventsByYears(startYear, endYear);
+
+    if (filtered.includes('lunar') && lunarData.lunarEvents) {
+      allEvents.push(...lunarData.lunarEvents.map(ev => ({
+        date: ev.date,
+        summary: ev.summary,
+        type: 'lunar',
+      })));
+    }
+    if (filtered.includes('solar') && lunarData.solarTermEvents) {
+      allEvents.push(...lunarData.solarTermEvents.map(ev => ({
+        date: ev.date,
+        summary: ev.summary,
+        type: 'solar-term',
+      })));
+    }
+    if (filtered.includes('yiji') && lunarData.yiJiEvents) {
+      allEvents.push(...lunarData.yiJiEvents.map(ev => ({
+        date: ev.date,
+        summary: ev.summary,
+        type: 'yiji',
+      })));
+    }
+
+    // 3. 普通节日
+    if (filtered.includes('festivals')) {
+      try {
+        const { getFestivalEvents } = await getFestivals();
+        const events = getFestivalEvents(startYear, endYear);
+        allEvents.push(...events.map(ev => ({
+          date: ev.date,
+          summary: ev.summary,
+          type: 'festival',
+        })));
+      } catch (e) {
+        console.error('[preview] 节日生成失败：', e.message);
+      }
+    }
+
+    // 按日期排序
+    allEvents.sort((a, b) => a.date.localeCompare(b.date));
+
+    // 过滤：只显示从今天开始的事件
+    const today = dayjs().format('YYYY-MM-DD');
+    const upcomingEvents = allEvents.filter(ev => ev.date >= today);
+
+    // 限制数量
+    const limitedEvents = upcomingEvents.slice(0, limit);
+
+    const preview = {
+      total: upcomingEvents.length,
+      showing: limitedEvents.length,
+      dateRange: {
+        start: startYear,
+        end: endYear,
+      },
+      events: limitedEvents,
+    };
+
+    return new Response(JSON.stringify(preview), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 's-maxage=1800, stale-while-revalidate=3600',
+        ...corsHeaders,
+      },
+    });
+
+  } catch (error) {
+    console.error('[preview] 错误：', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+}
+
 // ===== 主生成逻辑 =====
 
 async function generateCalendar({ sources, holidayApi, year, icons = true }) {
@@ -710,6 +848,11 @@ export default {
         status: 200,
         headers: corsHeaders,
       });
+    }
+
+    // 预览端点
+    if (path === '/api/preview') {
+      return handlePreviewRequest(url.searchParams, corsHeaders);
     }
 
     const { searchParams } = url;
