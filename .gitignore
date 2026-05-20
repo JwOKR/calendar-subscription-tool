@@ -26,3 +26,4 @@ temp/
 
 # 缓存目录
 data/
+.vercel/
