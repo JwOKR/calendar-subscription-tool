@@ -597,6 +597,34 @@ function renderHTML(origin) {
         .toggle-text { font-size:13px; color:#666; min-width:70px; text-align:center; }
         .merge-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
         .merge-tag { background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600; }
+
+        /* 事件预览标签页样式 */
+        .preview-section { background:white; border-radius:16px; padding:24px; margin-top:20px; box-shadow:0 4px 12px rgba(0,0,0,0.1); display:none; }
+        .preview-section.active { display:block; }
+        .preview-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+        .preview-header h3 { color:#333; font-size:18px; }
+        .preview-stats { color:#666; font-size:13px; background:#f8f9fa; padding:6px 12px; border-radius:8px; }
+        .preview-list { max-height:500px; overflow-y:auto; }
+        .preview-item { display:flex; padding:12px 0; border-bottom:1px solid #f0f0f0; align-items:center; }
+        .preview-item:last-child { border-bottom:none; }
+        .preview-date { background:#667eea; color:white; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; min-width:100px; text-align:center; margin-right:16px; flex-shrink:0; }
+        .preview-date.holiday { background:#48bb78; }
+        .preview-date.workday { background:#ed8936; }
+        .preview-date.festival { background:#e53e3e; }
+        .preview-date.lunar { background:#805ad5; }
+        .preview-date.solar-term { background:#dd6b20; }
+        .preview-date.yiji { background:#718096; }
+        .preview-info { flex:1; }
+        .preview-summary { color:#333; font-size:14px; font-weight:500; }
+        .preview-meta { display:flex; align-items:center; gap:8px; margin-top:4px; }
+        .preview-countdown { color:#667eea; font-size:12px; font-weight:600; }
+        .preview-error { text-align:center; padding:40px; color:#e74c3c; }
+        .preview-type { color:#999; font-size:11px; margin-left:8px; background:#f0f0f0; padding:2px 8px; border-radius:4px; }
+        .preview-loading { text-align:center; padding:40px; color:#666; }
+        .preview-empty { text-align:center; padding:40px; color:#999; }
+        .btn-preview { background:linear-gradient(135deg, #48bb78 0%, #38a169 100%); color:white; padding:10px 20px; border-radius:10px; border:none; font-weight:600; cursor:pointer; transition:all 0.2s; width:100%; }
+        .btn-preview:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(72,187,120,0.4); }
+        .btn-preview:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
     </style>
 </head>
 <body>
@@ -621,6 +649,7 @@ function renderHTML(origin) {
         <!-- 标签栏 -->
         <div class="tab-bar">
             <div class="tab active" onclick="switchTab('subscribe')">📡 订阅日历</div>
+            <div class="tab" onclick="switchTab('preview')">👁️ 预览事件</div>
             <div class="tab" onclick="switchTab('customize')">⚙️ 定制我的日历</div>
             <div class="tab" onclick="switchTab('guide')">📱 使用教程</div>
         </div>
@@ -745,6 +774,56 @@ function renderHTML(origin) {
             </div>
         </div>
 
+        <!-- 预览标签页 -->
+        <div id="tab-preview" class="tab-content">
+            <div class="guide-card">
+                <h2>👁️ 日历事件预览</h2>
+                <p style="color:#666; margin-bottom:20px; line-height:1.6;">选择要预览的日历源，查看即将发生的事件：</p>
+
+                <div style="background:#f8f9fa; padding:20px; border-radius:12px; margin-bottom:20px;">
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; color:#333; font-weight:600; margin-bottom:8px;">📋 选择订阅源</label>
+                        <div style="display:flex; flex-wrap:wrap; gap:12px;">
+                            <label style="display:flex; align-items:center; cursor:pointer;">
+                                <input type="checkbox" id="preview-holidays" checked style="margin-right:6px;"> 🇨🇳 节假日
+                            </label>
+                            <label style="display:flex; align-items:center; cursor:pointer;">
+                                <input type="checkbox" id="preview-lunar" checked style="margin-right:6px;"> 🌙 农历
+                            </label>
+                            <label style="display:flex; align-items:center; cursor:pointer;">
+                                <input type="checkbox" id="preview-solar" checked style="margin-right:6px;"> ☀️ 节气
+                            </label>
+                            <label style="display:flex; align-items:center; cursor:pointer;">
+                                <input type="checkbox" id="preview-yiji" style="margin-right:6px;"> 📋 宜忌
+                            </label>
+                            <label style="display:flex; align-items:center; cursor:pointer;">
+                                <input type="checkbox" id="preview-festivals" checked style="margin-right:6px;"> 🎉 节日
+                            </label>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; color:#333; font-weight:600; margin-bottom:6px;">📊 显示数量</label>
+                        <select id="preview-limit" style="padding:10px; border:2px solid #e9ecef; border-radius:8px; font-size:14px;">
+                            <option value="20">20 条</option>
+                            <option value="50" selected>50 条</option>
+                            <option value="100">100 条</option>
+                            <option value="200">200 条</option>
+                        </select>
+                    </div>
+                    <button onclick="loadPreview()" class="btn-preview" style="width:100%;">🔍 获取预览</button>
+                </div>
+
+                <!-- 预览结果 -->
+                <div id="preview-result" class="preview-section">
+                    <div class="preview-header">
+                        <h3>📅 即将发生的事件</h3>
+                        <span class="preview-stats" id="preview-stats"></span>
+                    </div>
+                    <div class="preview-list" id="preview-list"></div>
+                </div>
+            </div>
+        </div>
+
         <div class="footer">
             <p>⚡ 由 Cloudflare Workers 动态生成 | 支持自定义参数</p>
             <p style="margin-top:8px;">💡 点击订阅链接可复制 | <a href="https://github.com/JwOKR/calendar-subscription-tool" target="_blank">GitHub 仓库</a></p>
@@ -816,6 +895,99 @@ function renderHTML(origin) {
             urlDiv.textContent = window.location.origin + apiUrl;
             resultDiv.style.display = 'block';
             resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function loadPreview() {
+            var sources = [];
+            if (document.getElementById('preview-holidays').checked) sources.push('holidays');
+            if (document.getElementById('preview-lunar').checked) sources.push('lunar');
+            if (document.getElementById('preview-solar').checked) sources.push('solar');
+            if (document.getElementById('preview-yiji').checked) sources.push('yiji');
+            if (document.getElementById('preview-festivals').checked) sources.push('festivals');
+
+            if (sources.length === 0) {
+                alert('请至少选择一个订阅源！');
+                return;
+            }
+
+            var limit = document.getElementById('preview-limit').value;
+            var previewBtn = document.querySelector('.btn-preview');
+            var listDiv = document.getElementById('preview-list');
+            var statsDiv = document.getElementById('preview-stats');
+
+            previewBtn.disabled = true;
+            previewBtn.textContent = '⏳ 加载中...';
+            listDiv.innerHTML = '<div class="preview-loading">正在获取数据...</div>';
+
+            var apiUrl = '/api/preview?sources=' + sources.join(',') + '&limit=' + limit;
+
+            fetch(apiUrl)
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    previewBtn.disabled = false;
+                    previewBtn.textContent = '🔍 获取预览';
+
+                    if (data.error) {
+                        listDiv.innerHTML = '<div class="preview-error">❌ ' + data.error + '</div>';
+                        statsDiv.textContent = '';
+                        return;
+                    }
+
+                    if (!data.events || data.events.length === 0) {
+                        listDiv.innerHTML = '<div class="preview-empty">暂无即将到来的事件</div>';
+                        statsDiv.textContent = '';
+                        return;
+                    }
+
+                    var typeLabels = {
+                        'holiday': '🎉 节假日',
+                        'lunar': '🌙 农历',
+                        'solar': '☀️ 节气',
+                        'yiji': '📋 宜忌',
+                        'festival': '🎊 节日'
+                    };
+
+                    var typeColors = {
+                        'holiday': 'holiday',
+                        'lunar': 'lunar',
+                        'solar': 'solar-term',
+                        'yiji': 'yiji',
+                        'festival': 'festival'
+                    };
+
+                    var today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    var html = '';
+                    data.events.forEach(function(ev) {
+                        var evDate = new Date(ev.date + 'T00:00:00');
+                        var diffDays = Math.ceil((evDate - today) / (1000 * 60 * 60 * 24));
+                        var countdownText = diffDays === 0 ? '今天' : (diffDays > 0 ? diffDays + ' 天后' : Math.abs(diffDays) + ' 天前');
+
+                        var typeClass = typeColors[ev.type] || '';
+                        var typeLabel = typeLabels[ev.type] || ev.type;
+
+                        html += '<div class="preview-item">' +
+                            '<div class="preview-date ' + typeClass + '">' + ev.date + '</div>' +
+                            '<div class="preview-info">' +
+                                '<div class="preview-summary">' + ev.summary + '</div>' +
+                                '<div class="preview-meta">' +
+                                    '<span class="preview-countdown">⏰ ' + countdownText + '</span>' +
+                                    '<span class="preview-type">' + typeLabel + '</span>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
+                    });
+
+                    listDiv.innerHTML = html;
+                    statsDiv.textContent = '显示 ' + data.showing + ' / ' + data.total + ' 条事件（' + data.dateRange.start + '-' + data.dateRange.end + '）';
+                })
+                .catch(function(err) {
+                    previewBtn.disabled = false;
+                    previewBtn.textContent = '🔍 获取预览';
+                    listDiv.innerHTML = '<div class="preview-error">❌ 网络错误：' + err.message + '</div>';
+                    statsDiv.textContent = '';
+                });
         }
     </script>
 </body>
