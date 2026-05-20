@@ -558,7 +558,7 @@ const html = `<!DOCTYPE html>
             previewBtn.textContent = '⏳ 加载中...';
             listDiv.innerHTML = '<div class="preview-loading">正在获取数据...</div>';
 
-            var apiUrl = '${workersUrl}/api/preview?sources=' + sources.join(',') + '&limit=' + limit;
+            var apiUrl = workersUrl + '/api/preview?sources=' + sources.join(',') + '&limit=' + limit;
 
             fetch(apiUrl)
                 .then(function(res) { return res.json(); })
@@ -596,9 +596,13 @@ const html = `<!DOCTYPE html>
 
                     var html = '';
                     data.events.forEach(function(ev) {
-                        var daysText = ev.daysUntil === 0 ? '今天' :
-                                       ev.daysUntil === 1 ? '明天' :
-                                       ev.daysUntil + '天后';
+                        var today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        var evDate = new Date(ev.date + 'T00:00:00');
+                        var diffDays = Math.ceil((evDate - today) / (1000 * 60 * 60 * 24));
+                        var daysText = diffDays === 0 ? '今天' :
+                                       diffDays === 1 ? '明天' :
+                                       diffDays > 0 ? diffDays + '天后' : Math.abs(diffDays) + '天前';
 
                         var typeLabel = typeLabels[ev.type] || ev.type;
                         var typeColor = typeColors[ev.type] || '#666';
