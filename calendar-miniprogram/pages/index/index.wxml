@@ -34,7 +34,7 @@
       desc="{{item.desc}}"
       badge="{{item.badge}}"
       badgeType="{{item.badgeType}}"
-      sources="{{item.sources}}"
+      icsFile="{{item.icsFile}}"
       tags="{{item.tags}}"
       iconMode="{{iconMode}}"
     ></sub-card>

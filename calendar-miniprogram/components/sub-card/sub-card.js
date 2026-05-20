@@ -7,6 +7,7 @@ Component({
     badgeType: { type: String, value: '' },
     tags: { type: Array, value: [] },
     sources: { type: String, value: '' },
+    icsFile: { type: String, value: '' },
     // 'icon' = 带图标版，'noicon' = 无图标版
     iconMode: { type: String, value: 'noicon' }
   },
@@ -24,7 +25,7 @@ Component({
   },
 
   observers: {
-    'sources, iconMode': function () {
+    'icsFile, iconMode': function () {
       this.updateUrl();
     }
   },
@@ -33,9 +34,9 @@ Component({
     updateUrl() {
       const app = getApp();
       const base = app.globalData.githubPagesBase;
-      const { sources, iconMode } = this.properties;
+      const { icsFile, iconMode } = this.properties;
       const suffix = iconMode === 'icon' ? '' : '-noicon';
-      const url = `${base}/${sources}${suffix}.ics`;
+      const url = `${base}/${icsFile}${suffix}.ics`;
       const label = iconMode === 'icon' ? '🎨 带图标版' : '📝 无图标版';
       this.setData({ displayUrl: url, linkLabel: label });
     },

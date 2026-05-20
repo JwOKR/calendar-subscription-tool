@@ -14,6 +14,7 @@ App({
         badge: 'ALL-IN-ONE',
         badgeType: 'allinone',
         sources: 'holidays,lunar,solar,festivals',
+        icsFile: 'all-in-one',
         tags: ['🇨🇳 中国节假日', '🌙 农历日历', '☀️ 二十四节气', '🎉 普通节日'],
         section: 'recommend'
       },
@@ -23,6 +24,7 @@ App({
         icon: '📋',
         desc: '每日宜忌 + 吉神凶煞（传统黄历）',
         sources: 'yiji',
+        icsFile: 'yi-ji',
         section: 'yiji'
       },
       {
@@ -33,6 +35,7 @@ App({
         badge: '推荐',
         badgeType: 'recommend',
         sources: 'holidays',
+        icsFile: 'china-holidays',
         section: 'combined'
       },
       {
@@ -41,6 +44,7 @@ App({
         icon: '🌙',
         desc: '农历日期 + 传统节日（春节、中秋、端午等）',
         sources: 'lunar',
+        icsFile: 'lunar-calendar',
         section: 'combined'
       },
       {
@@ -49,6 +53,7 @@ App({
         icon: '☀️',
         desc: '完整二十四节气，精准到分钟',
         sources: 'solar',
+        icsFile: 'solar-terms',
         section: 'combined'
       },
       {
@@ -57,6 +62,7 @@ App({
         icon: '🎉',
         desc: '公历节日 + 国际节日 + 动态日期节日',
         sources: 'festivals',
+        icsFile: 'festivals',
         section: 'combined'
       }
     ],
