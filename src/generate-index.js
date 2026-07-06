@@ -25,16 +25,18 @@ const startYear = currentYear - 5;
 const endYear = currentYear + 2;
 
 /**
- * 生成单链接 HTML（带 data-icon / data-noicon 属性，由切换开关控制显示）
+ * 生成单链接 HTML（带 data-icon / data-noicon / data-webcal-icon / data-webcal-noicon 属性，由切换开关控制显示）
  * @param {string} fileBase - 文件名基础（不含扩展名，不含 -noicon 后缀）
  * @returns {string} HTML 片段
  */
 function singleLink(fileBase) {
   const withIcon = `${repoUrl}/${fileBase}.ics`;
   const noIcon = `${repoUrl}/${fileBase}-noicon.ics`;
+  const webcalWithIcon = `webcal://${repoOwner}.github.io/${repoName}/${fileBase}.ics`;
+  const webcalNoIcon = `webcal://${repoOwner}.github.io/${repoName}/${fileBase}-noicon.ics`;
   return `
-                    <div class="url-label" id="label-${fileBase}">📝 无图标版</div>
-                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="${withIcon}" data-noicon="${noIcon}">${noIcon}</div>`;
+                    <div class="url-label" id="label-${fileBase}">📝 无图标版（HTTPS）</div>
+                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="${withIcon}" data-noicon="${noIcon}" data-webcal-icon="${webcalWithIcon}" data-webcal-noicon="${webcalNoIcon}">${noIcon}</div>`;
 }
 
 /**
@@ -107,7 +109,7 @@ const html = `<!DOCTYPE html>
         ul { color:#666; font-size:14px; line-height:1.8; margin-top:8px; padding-left:20px; }
 
         /* 图标切换开关 */
-        .icon-toggle { display:flex; align-items:center; justify-content:center; gap:16px; background:white; border-radius:16px; padding:16px 24px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+        .icon-toggle { display:flex; align-items:center; justify-content:center; gap:16px; background:white; border-radius:16px; padding:16px 24px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); flex-wrap:wrap; }
         .toggle-label { font-size:15px; color:#333; font-weight:500; }
         .toggle-switch { position:relative; width:56px; height:30px; cursor:pointer; display:inline-block; flex-shrink:0; }
         .toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
@@ -118,6 +120,9 @@ const html = `<!DOCTYPE html>
         .toggle-switch input:not(:checked) ~ .toggle-dot { left:3px; }
         .toggle-switch input:checked ~ .toggle-dot { left:29px; }
         .toggle-text { font-size:13px; color:#666; min-width:70px; text-align:center; }
+
+        /* 协议切换开关 */
+        .protocol-toggle { display:flex; align-items:center; justify-content:center; gap:16px; background:white; border-radius:16px; padding:16px 24px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); flex-wrap:wrap; }
 
         /* Workers 横幅 */
         .workers-banner { background:linear-gradient(135deg, #f6e05e 0%, #ed8936 100%); border-radius:12px; padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
@@ -190,6 +195,17 @@ const html = `<!DOCTYPE html>
                 <span class="toggle-dot"></span>
             </label>
             <span class="toggle-label">订阅版本</span>
+        </div>
+
+        <!-- 协议切换 -->
+        <div class="protocol-toggle">
+            <span class="toggle-text" id="protocolText">🔒 HTTPS 协议</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="protocolToggle" onchange="toggleProtocolMode()">
+                <span class="toggle-track"></span>
+                <span class="toggle-dot"></span>
+            </label>
+            <span class="toggle-label">订阅协议</span>
         </div>
 
         <!-- CF Workers 横幅 -->
@@ -455,6 +471,8 @@ const html = `<!DOCTYPE html>
     <script>
         // 图标模式切换（默认无图标）
         let iconMode = 'noicon';
+        // 协议模式切换（默认 https）
+        let protocolMode = 'https';
 
         function toggleIconMode() {
             const checked = document.getElementById('iconToggle').checked;
@@ -462,17 +480,47 @@ const html = `<!DOCTYPE html>
             const label = iconMode === 'icon' ? '🎨 带图标版' : '📝 无图标版';
             document.getElementById('toggleText').textContent = label;
 
+            updateSubscriptionUrls();
+        }
+
+        function toggleProtocolMode() {
+            const checked = document.getElementById('protocolToggle').checked;
+            protocolMode = checked ? 'webcal' : 'https';
+            const label = protocolMode === 'webcal' ? '🌐 WebCal 协议' : '🔒 HTTPS 协议';
+            document.getElementById('protocolText').textContent = label;
+
+            updateSubscriptionUrls();
+        }
+
+        function updateSubscriptionUrls() {
+            // 确定要使用的数据属性
+            const iconKey = protocolMode === 'webcal' ? 'webcal-' + iconMode : iconMode;
+
             // 更新所有卡片的显示
             document.querySelectorAll('.subscription-url').forEach(el => {
-                const url = el.dataset[iconMode];
-                el.textContent = url;
+                const url = el.dataset[iconKey];
+                if (url) {
+                    el.textContent = url;
+                }
             });
+
+            // 更新自定义订阅链接
+            const customUrlEl = document.getElementById('custom-url');
+            if (customUrlEl && customUrlEl.dataset.https) {
+                const url = protocolMode === 'webcal' ? customUrlEl.dataset.webcal : customUrlEl.dataset.https;
+                customUrlEl.textContent = url;
+            }
+
+            // 更新所有标签的文本
+            const versionLabel = iconMode === 'icon' ? '（带图标版）' : '（无图标版）';
+            const protocolLabel = protocolMode === 'webcal' ? '（WebCal）' : '（HTTPS）';
             document.querySelectorAll('[id^="label-"]').forEach(el => {
-                el.textContent = label;
+                el.textContent = versionLabel + ' ' + protocolLabel;
             });
+
             // 更新所有卡片标题的版本标签
             document.querySelectorAll('.version-label').forEach(el => {
-                el.textContent = iconMode === 'icon' ? '（带图标版）' : '（无图标版）';
+                el.textContent = versionLabel + ' ' + protocolLabel;
             });
         }
 
@@ -517,7 +565,7 @@ const html = `<!DOCTYPE html>
                 return;
             }
 
-            let apiUrl = '${workersUrl}/api/calendar?sources=' + sources.join(',');
+            let apiUrl = workersUrl + '/api/calendar?sources=' + sources.join(',');
             if (holidayApi) {
                 apiUrl += '&holidayApi=' + encodeURIComponent(holidayApi);
             }
@@ -528,9 +576,17 @@ const html = `<!DOCTYPE html>
                 apiUrl += '&icons=false';
             }
 
+            // 根据当前协议模式生成链接
+            let displayUrl = apiUrl;
+            if (protocolMode === 'webcal') {
+                displayUrl = apiUrl.replace('https://', 'webcal://');
+            }
+
             const resultDiv = document.getElementById('custom-result');
             const urlDiv = document.getElementById('custom-url');
-            urlDiv.textContent = apiUrl;
+            urlDiv.textContent = displayUrl;
+            urlDiv.dataset.https = apiUrl;
+            urlDiv.dataset.webcal = apiUrl.replace('https://', 'webcal://');
             resultDiv.style.display = 'block';
             resultDiv.scrollIntoView({ behavior: 'smooth' });
         }

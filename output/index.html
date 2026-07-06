@@ -46,7 +46,7 @@
         ul { color:#666; font-size:14px; line-height:1.8; margin-top:8px; padding-left:20px; }
 
         /* 图标切换开关 */
-        .icon-toggle { display:flex; align-items:center; justify-content:center; gap:16px; background:white; border-radius:16px; padding:16px 24px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+        .icon-toggle { display:flex; align-items:center; justify-content:center; gap:16px; background:white; border-radius:16px; padding:16px 24px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); flex-wrap:wrap; }
         .toggle-label { font-size:15px; color:#333; font-weight:500; }
         .toggle-switch { position:relative; width:56px; height:30px; cursor:pointer; display:inline-block; flex-shrink:0; }
         .toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
@@ -57,6 +57,9 @@
         .toggle-switch input:not(:checked) ~ .toggle-dot { left:3px; }
         .toggle-switch input:checked ~ .toggle-dot { left:29px; }
         .toggle-text { font-size:13px; color:#666; min-width:70px; text-align:center; }
+
+        /* 协议切换开关 */
+        .protocol-toggle { display:flex; align-items:center; justify-content:center; gap:16px; background:white; border-radius:16px; padding:16px 24px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); flex-wrap:wrap; }
 
         /* Workers 横幅 */
         .workers-banner { background:linear-gradient(135deg, #f6e05e 0%, #ed8936 100%); border-radius:12px; padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
@@ -114,7 +117,7 @@
         <!-- 头部 -->
         <div class="header-card">
             <h1>📅 日历订阅源</h1>
-            <div class="update-time"><span class="pulse-dot"></span>🤖 自动更新 · 每天北京时间凌晨 2 点 · 最后生成: 2026-07-05 19:04:47 UTC</div>
+            <div class="update-time"><span class="pulse-dot"></span>🤖 自动更新 · 每天北京时间凌晨 2 点 · 最后生成: 2026-07-06 02:17:10 UTC</div>
             <div style="margin-top:12px;">
                 <span class="year-range-badge">📅 覆盖年份：2021 - 2028</span>
             </div>
@@ -129,6 +132,17 @@
                 <span class="toggle-dot"></span>
             </label>
             <span class="toggle-label">订阅版本</span>
+        </div>
+
+        <!-- 协议切换 -->
+        <div class="protocol-toggle">
+            <span class="toggle-text" id="protocolText">🔒 HTTPS 协议</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="protocolToggle" onchange="toggleProtocolMode()">
+                <span class="toggle-track"></span>
+                <span class="toggle-dot"></span>
+            </label>
+            <span class="toggle-label">订阅协议</span>
         </div>
 
         <!-- CF Workers 横幅 -->
@@ -159,8 +173,8 @@
                     <span class="merge-tag">🎉 普通节日</span>
                 </div>
                 
-                    <div class="url-label" id="label-all-in-one">📝 无图标版</div>
-                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/all-in-one.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/all-in-one-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/all-in-one-noicon.ics</div>
+                    <div class="url-label" id="label-all-in-one">📝 无图标版（HTTPS）</div>
+                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/all-in-one.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/all-in-one-noicon.ics" data-webcal-icon="webcal://JwOKR.github.io/calendar-subscription-tool/all-in-one.ics" data-webcal-noicon="webcal://JwOKR.github.io/calendar-subscription-tool/all-in-one-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/all-in-one-noicon.ics</div>
             </div>
 
             <!-- 📋 宜忌日历 -->
@@ -169,8 +183,8 @@
                 <h3>📋 宜忌日历 <span class="version-label">（无图标版）</span></h3>
                 <p>每日宜忌 + 吉神凶煞（传统黄历）</p>
                 
-                    <div class="url-label" id="label-yi-ji">📝 无图标版</div>
-                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/yi-ji.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/yi-ji-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/yi-ji-noicon.ics</div>
+                    <div class="url-label" id="label-yi-ji">📝 无图标版（HTTPS）</div>
+                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/yi-ji.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/yi-ji-noicon.ics" data-webcal-icon="webcal://JwOKR.github.io/calendar-subscription-tool/yi-ji.ics" data-webcal-noicon="webcal://JwOKR.github.io/calendar-subscription-tool/yi-ji-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/yi-ji-noicon.ics</div>
                 <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
                 <div class="preview-content">
                     <ul>
@@ -186,8 +200,8 @@
                 <h3>🇨🇳 中国节假日 <span class="version-label">（无图标版）</span></h3>
                 <p>国务院办公厅发布的法定节假日 + 调休安排</p>
                 
-                    <div class="url-label" id="label-china-holidays">📝 无图标版</div>
-                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/china-holidays.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/china-holidays-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/china-holidays-noicon.ics</div>
+                    <div class="url-label" id="label-china-holidays">📝 无图标版（HTTPS）</div>
+                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/china-holidays.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/china-holidays-noicon.ics" data-webcal-icon="webcal://JwOKR.github.io/calendar-subscription-tool/china-holidays.ics" data-webcal-noicon="webcal://JwOKR.github.io/calendar-subscription-tool/china-holidays-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/china-holidays-noicon.ics</div>
                 <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
                 <div class="preview-content">
                     <ul>
@@ -201,8 +215,8 @@
                 <h3>🌙 农历日历 <span class="version-label">（无图标版）</span></h3>
                 <p>农历日期 + 传统节日（春节、中秋、端午等）</p>
                 
-                    <div class="url-label" id="label-lunar-calendar">📝 无图标版</div>
-                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/lunar-calendar.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/lunar-calendar-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/lunar-calendar-noicon.ics</div>
+                    <div class="url-label" id="label-lunar-calendar">📝 无图标版（HTTPS）</div>
+                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/lunar-calendar.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/lunar-calendar-noicon.ics" data-webcal-icon="webcal://JwOKR.github.io/calendar-subscription-tool/lunar-calendar.ics" data-webcal-noicon="webcal://JwOKR.github.io/calendar-subscription-tool/lunar-calendar-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/lunar-calendar-noicon.ics</div>
                 <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
                 <div class="preview-content">
                     <ul>
@@ -216,8 +230,8 @@
                 <h3>☀️ 二十四节气 <span class="version-label">（无图标版）</span></h3>
                 <p>完整二十四节气，精准到分钟</p>
                 
-                    <div class="url-label" id="label-solar-terms">📝 无图标版</div>
-                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/solar-terms.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/solar-terms-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/solar-terms-noicon.ics</div>
+                    <div class="url-label" id="label-solar-terms">📝 无图标版（HTTPS）</div>
+                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/solar-terms.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/solar-terms-noicon.ics" data-webcal-icon="webcal://JwOKR.github.io/calendar-subscription-tool/solar-terms.ics" data-webcal-noicon="webcal://JwOKR.github.io/calendar-subscription-tool/solar-terms-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/solar-terms-noicon.ics</div>
                 <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
                 <div class="preview-content">
                     <ul>
@@ -232,8 +246,8 @@
                 <h3>🎉 普通节日 <span class="version-label">（无图标版）</span></h3>
                 <p>公历节日 + 国际节日 + 动态日期节日</p>
                 
-                    <div class="url-label" id="label-festivals">📝 无图标版</div>
-                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/festivals.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/festivals-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/festivals-noicon.ics</div>
+                    <div class="url-label" id="label-festivals">📝 无图标版（HTTPS）</div>
+                    <div class="subscription-url" onclick="copyUrl(this)" data-icon="https://JwOKR.github.io/calendar-subscription-tool/festivals.ics" data-noicon="https://JwOKR.github.io/calendar-subscription-tool/festivals-noicon.ics" data-webcal-icon="webcal://JwOKR.github.io/calendar-subscription-tool/festivals.ics" data-webcal-noicon="webcal://JwOKR.github.io/calendar-subscription-tool/festivals-noicon.ics">https://JwOKR.github.io/calendar-subscription-tool/festivals-noicon.ics</div>
                 <div class="preview-toggle" onclick="togglePreview(this)">▾ 查看包含内容</div>
                 <div class="preview-content">
                     <ul>
@@ -441,6 +455,8 @@
     <script>
         // 图标模式切换（默认无图标）
         let iconMode = 'noicon';
+        // 协议模式切换（默认 https）
+        let protocolMode = 'https';
 
         function toggleIconMode() {
             const checked = document.getElementById('iconToggle').checked;
@@ -448,17 +464,47 @@
             const label = iconMode === 'icon' ? '🎨 带图标版' : '📝 无图标版';
             document.getElementById('toggleText').textContent = label;
 
+            updateSubscriptionUrls();
+        }
+
+        function toggleProtocolMode() {
+            const checked = document.getElementById('protocolToggle').checked;
+            protocolMode = checked ? 'webcal' : 'https';
+            const label = protocolMode === 'webcal' ? '🌐 WebCal 协议' : '🔒 HTTPS 协议';
+            document.getElementById('protocolText').textContent = label;
+
+            updateSubscriptionUrls();
+        }
+
+        function updateSubscriptionUrls() {
+            // 确定要使用的数据属性
+            const iconKey = protocolMode === 'webcal' ? 'webcal-' + iconMode : iconMode;
+
             // 更新所有卡片的显示
             document.querySelectorAll('.subscription-url').forEach(el => {
-                const url = el.dataset[iconMode];
-                el.textContent = url;
+                const url = el.dataset[iconKey];
+                if (url) {
+                    el.textContent = url;
+                }
             });
+
+            // 更新自定义订阅链接
+            const customUrlEl = document.getElementById('custom-url');
+            if (customUrlEl && customUrlEl.dataset.https) {
+                const url = protocolMode === 'webcal' ? customUrlEl.dataset.webcal : customUrlEl.dataset.https;
+                customUrlEl.textContent = url;
+            }
+
+            // 更新所有标签的文本
+            const versionLabel = iconMode === 'icon' ? '（带图标版）' : '（无图标版）';
+            const protocolLabel = protocolMode === 'webcal' ? '（WebCal）' : '（HTTPS）';
             document.querySelectorAll('[id^="label-"]').forEach(el => {
-                el.textContent = label;
+                el.textContent = versionLabel + ' ' + protocolLabel;
             });
+
             // 更新所有卡片标题的版本标签
             document.querySelectorAll('.version-label').forEach(el => {
-                el.textContent = iconMode === 'icon' ? '（带图标版）' : '（无图标版）';
+                el.textContent = versionLabel + ' ' + protocolLabel;
             });
         }
 
@@ -503,7 +549,7 @@
                 return;
             }
 
-            let apiUrl = 'https://calendar-subscription-tool.1669443179.workers.dev/api/calendar?sources=' + sources.join(',');
+            let apiUrl = workersUrl + '/api/calendar?sources=' + sources.join(',');
             if (holidayApi) {
                 apiUrl += '&holidayApi=' + encodeURIComponent(holidayApi);
             }
@@ -514,9 +560,17 @@
                 apiUrl += '&icons=false';
             }
 
+            // 根据当前协议模式生成链接
+            let displayUrl = apiUrl;
+            if (protocolMode === 'webcal') {
+                displayUrl = apiUrl.replace('https://', 'webcal://');
+            }
+
             const resultDiv = document.getElementById('custom-result');
             const urlDiv = document.getElementById('custom-url');
-            urlDiv.textContent = apiUrl;
+            urlDiv.textContent = displayUrl;
+            urlDiv.dataset.https = apiUrl;
+            urlDiv.dataset.webcal = apiUrl.replace('https://', 'webcal://');
             resultDiv.style.display = 'block';
             resultDiv.scrollIntoView({ behavior: 'smooth' });
         }
