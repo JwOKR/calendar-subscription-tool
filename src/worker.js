@@ -540,6 +540,7 @@ async function fetchStaticICS(sourcesKey, icons) {
  */
 function renderHTML(origin) {
   const repoUrl = `${origin}/api/calendar`;
+  const webcalUrl = origin.replace('https://', 'webcal://') + '/api/calendar';
 
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -596,6 +597,9 @@ function renderHTML(origin) {
         .toggle-switch input:checked ~ .toggle-dot { left:29px; }
         .toggle-text { font-size:13px; color:#666; min-width:70px; text-align:center; }
         .merge-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+
+        /* 协议切换开关 */
+        .protocol-toggle { display:flex; align-items:center; justify-content:center; gap:16px; background:white; border-radius:16px; padding:16px 24px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); flex-wrap:wrap; }
         .merge-tag { background:rgba(72,187,120,0.15); color:#2f855a; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600; }
 
         /* 事件预览标签页样式 */
@@ -646,6 +650,17 @@ function renderHTML(origin) {
             <span class="toggle-label">订阅版本</span>
         </div>
 
+        <!-- 协议切换 -->
+        <div class="protocol-toggle">
+            <span class="toggle-text" id="protocolText">🔒 HTTPS 协议</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="protocolToggle" onchange="toggleProtocolMode()">
+                <span class="toggle-track"></span>
+                <span class="toggle-dot"></span>
+            </label>
+            <span class="toggle-label">订阅协议</span>
+        </div>
+
         <!-- 标签栏 -->
         <div class="tab-bar">
             <div class="tab active" onclick="switchTab('subscribe')">📡 订阅日历</div>
@@ -667,8 +682,8 @@ function renderHTML(origin) {
                     <span class="merge-tag">☀️ 二十四节气</span>
                     <span class="merge-tag">🎉 普通节日</span>
                 </div>
-                <div class="url-label" id="label-all-in-one">📝 无图标版</div>
-                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=holidays,lunar,solar,festivals" data-noicon="${repoUrl}?sources=holidays,lunar,solar,festivals&icons=false">${repoUrl}?sources=holidays,lunar,solar,festivals&icons=false</div>
+                <div class="url-label" id="label-all-in-one">📝 无图标版（HTTPS）</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=holidays,lunar,solar,festivals" data-noicon="${repoUrl}?sources=holidays,lunar,solar,festivals&icons=false" data-webcal-icon="${webcalUrl}?sources=holidays,lunar,solar,festivals" data-webcal-noicon="${webcalUrl}?sources=holidays,lunar,solar,festivals&icons=false">${repoUrl}?sources=holidays,lunar,solar,festivals&icons=false</div>
             </div>
 
             <!-- 📋 宜忌日历 -->
@@ -676,8 +691,8 @@ function renderHTML(origin) {
             <div class="card">
                 <h3>📋 宜忌日历 <span class="version-label">（无图标版）</span></h3>
                 <p>每日宜忌 + 吉神凶煞（传统黄历）</p>
-                <div class="url-label" id="label-yiji">📝 无图标版</div>
-                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=yiji" data-noicon="${repoUrl}?sources=yiji&icons=false">${repoUrl}?sources=yiji&icons=false</div>
+                <div class="url-label" id="label-yiji">📝 无图标版（HTTPS）</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=yiji" data-noicon="${repoUrl}?sources=yiji&icons=false" data-webcal-icon="${webcalUrl}?sources=yiji" data-webcal-noicon="${webcalUrl}?sources=yiji&icons=false">${repoUrl}?sources=yiji&icons=false</div>
             </div>
 
             <!-- 🇨🇳 中国节假日 · 农历 · 节气 · 节日 -->
@@ -685,26 +700,26 @@ function renderHTML(origin) {
             <div class="card">
                 <h3>🇨🇳 中国节假日 <span class="version-label">（无图标版）</span></h3>
                 <p>国务院办公厅发布的法定节假日 + 调休安排</p>
-                <div class="url-label" id="label-holidays">📝 无图标版</div>
-                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=holidays" data-noicon="${repoUrl}?sources=holidays&icons=false">${repoUrl}?sources=holidays&icons=false</div>
+                <div class="url-label" id="label-holidays">📝 无图标版（HTTPS）</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=holidays" data-noicon="${repoUrl}?sources=holidays&icons=false" data-webcal-icon="${webcalUrl}?sources=holidays" data-webcal-noicon="${webcalUrl}?sources=holidays&icons=false">${repoUrl}?sources=holidays&icons=false</div>
             </div>
             <div class="card">
                 <h3>🌙 农历日历 <span class="version-label">（无图标版）</span></h3>
                 <p>农历日期 + 传统节日（春节、中秋、端午等）</p>
-                <div class="url-label" id="label-lunar">📝 无图标版</div>
-                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=lunar" data-noicon="${repoUrl}?sources=lunar&icons=false">${repoUrl}?sources=lunar&icons=false</div>
+                <div class="url-label" id="label-lunar">📝 无图标版（HTTPS）</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=lunar" data-noicon="${repoUrl}?sources=lunar&icons=false" data-webcal-icon="${webcalUrl}?sources=lunar" data-webcal-noicon="${webcalUrl}?sources=lunar&icons=false">${repoUrl}?sources=lunar&icons=false</div>
             </div>
             <div class="card">
                 <h3>☀️ 二十四节气 <span class="version-label">（无图标版）</span></h3>
                 <p>完整二十四节气，精准到分钟</p>
-                <div class="url-label" id="label-solar">📝 无图标版</div>
-                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=solar" data-noicon="${repoUrl}?sources=solar&icons=false">${repoUrl}?sources=solar&icons=false</div>
+                <div class="url-label" id="label-solar">📝 无图标版（HTTPS）</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=solar" data-noicon="${repoUrl}?sources=solar&icons=false" data-webcal-icon="${webcalUrl}?sources=solar" data-webcal-noicon="${webcalUrl}?sources=solar&icons=false">${repoUrl}?sources=solar&icons=false</div>
             </div>
             <div class="card">
                 <h3>🎉 普通节日 <span class="version-label">（无图标版）</span></h3>
                 <p>公历节日 + 国际节日 + 动态日期节日</p>
-                <div class="url-label" id="label-festivals">📝 无图标版</div>
-                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=festivals" data-noicon="${repoUrl}?sources=festivals&icons=false">${repoUrl}?sources=festivals&icons=false</div>
+                <div class="url-label" id="label-festivals">📝 无图标版（HTTPS）</div>
+                <div class="subscription-url" onclick="copyUrl(this)" data-icon="${repoUrl}?sources=festivals" data-noicon="${repoUrl}?sources=festivals&icons=false" data-webcal-icon="${webcalUrl}?sources=festivals" data-webcal-noicon="${webcalUrl}?sources=festivals&icons=false">${repoUrl}?sources=festivals&icons=false</div>
             </div>
         </div>
 
@@ -833,22 +848,58 @@ function renderHTML(origin) {
     <div class="copy-toast" id="copyToast">✅ 已复制到剪贴板！</div>
 
     <script>
+        // 图标模式切换（默认无图标）
         let iconMode = 'noicon';
+        // 协议模式切换（默认 https）
+        let protocolMode = 'https';
 
         function toggleIconMode() {
             const checked = document.getElementById('iconToggle').checked;
             iconMode = checked ? 'icon' : 'noicon';
             const label = iconMode === 'icon' ? '🎨 带图标版' : '📝 无图标版';
             document.getElementById('toggleText').textContent = label;
-            document.querySelectorAll('.subscription-url[data-icon]').forEach(el => {
-                el.textContent = el.dataset[iconMode];
+
+            updateSubscriptionUrls();
+        }
+
+        function toggleProtocolMode() {
+            const checked = document.getElementById('protocolToggle').checked;
+            protocolMode = checked ? 'webcal' : 'https';
+            const label = protocolMode === 'webcal' ? '🌐 WebCal 协议' : '🔒 HTTPS 协议';
+            document.getElementById('protocolText').textContent = label;
+
+            updateSubscriptionUrls();
+        }
+
+        function updateSubscriptionUrls() {
+            // 确定要使用的数据属性
+            const iconKey = protocolMode === 'webcal' ? 'webcal-' + iconMode : iconMode;
+
+            // 更新所有卡片的显示
+            document.querySelectorAll('.subscription-url').forEach(el => {
+                const url = el.dataset[iconKey];
+                if (url) {
+                    el.textContent = url;
+                }
             });
+
+            // 更新自定义订阅链接
+            const customUrlEl = document.getElementById('custom-url');
+            if (customUrlEl && customUrlEl.dataset.https) {
+                const url = protocolMode === 'webcal' ? customUrlEl.dataset.webcal : customUrlEl.dataset.https;
+                customUrlEl.textContent = url;
+            }
+
+            // 更新所有标签的文本
+            const versionLabel = iconMode === 'icon' ? '（带图标版）' : '（无图标版）';
+            const protocolLabel = protocolMode === 'webcal' ? '（WebCal）' : '（HTTPS）';
             document.querySelectorAll('[id^="label-"]').forEach(el => {
-                el.textContent = label;
+                el.textContent = versionLabel + ' ' + protocolLabel;
             });
+
             // 更新所有卡片标题的版本标签
             document.querySelectorAll('.version-label').forEach(el => {
-                el.textContent = iconMode === 'icon' ? '（带图标版）' : '（无图标版）';
+                el.textContent = versionLabel + ' ' + protocolLabel;
             });
         }
 
@@ -890,9 +941,20 @@ function renderHTML(origin) {
             if (holidayApi) apiUrl += '&holidayApi=' + encodeURIComponent(holidayApi);
             if (yearRange) apiUrl += '&year=' + encodeURIComponent(yearRange);
             if (document.querySelector('input[name="icons"]:checked').value === 'false') apiUrl += '&icons=false';
+
+            // 生成 https 和 webcal 两种格式的链接
+            const httpsUrl = window.location.origin + apiUrl;
+            const webcalUrl = httpsUrl.replace('https://', 'webcal://');
+
             const resultDiv = document.getElementById('custom-result');
             const urlDiv = document.getElementById('custom-url');
-            urlDiv.textContent = window.location.origin + apiUrl;
+            urlDiv.dataset.https = httpsUrl;
+            urlDiv.dataset.webcal = webcalUrl;
+
+            // 根据当前协议模式显示链接
+            const displayUrl = protocolMode === 'webcal' ? webcalUrl : httpsUrl;
+            urlDiv.textContent = displayUrl;
+
             resultDiv.style.display = 'block';
             resultDiv.scrollIntoView({ behavior: 'smooth' });
         }
