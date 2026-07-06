@@ -16,6 +16,11 @@
     </view>
   </view>
 
+  <!-- 预览入口 -->
+  <view class="preview-banner" bindtap="goPreview">
+    👁️ 预览即将到来的事件 →
+  </view>
+
   <!-- CF Workers 入口 -->
   <view class="workers-banner" bindtap="goCustomize">
     🚀 想要更多定制选项？前往定制页 →

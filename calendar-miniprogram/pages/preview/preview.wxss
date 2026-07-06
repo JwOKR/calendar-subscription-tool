@@ -1,0 +1,268 @@
+.container {
+  padding: 20rpx;
+  padding-bottom: 120rpx;
+}
+
+/* 头部卡片 */
+.header-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  margin-bottom: 20rpx;
+  color: white;
+  text-align: center;
+}
+
+.header-card .title {
+  font-size: 36rpx;
+  font-weight: 700;
+  margin-bottom: 10rpx;
+}
+
+.header-card .subtitle {
+  font-size: 24rpx;
+  opacity: 0.8;
+}
+
+/* 分区 */
+.section {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+}
+
+.section-title {
+  color: #667eea;
+  font-size: 30rpx;
+  font-weight: 700;
+  margin-bottom: 20rpx;
+}
+
+/* 订阅源列表 */
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.source-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  border-radius: 12rpx;
+  background: #f8f9fa;
+  border: 2rpx solid #e9ecef;
+  transition: all 0.2s;
+}
+
+.source-item.active {
+  background: #e7f0ff;
+  border-color: #667eea;
+}
+
+.check-box {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 8rpx;
+  border: 2rpx solid #ccc;
+  margin-right: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: white;
+  flex-shrink: 0;
+}
+
+.check-box.checked {
+  background: #667eea;
+  border-color: #667eea;
+}
+
+/* 数量选择 */
+.limit-list {
+  display: flex;
+  gap: 16rpx;
+  flex-wrap: wrap;
+}
+
+.limit-item {
+  padding: 12rpx 32rpx;
+  border-radius: 12rpx;
+  background: #f8f9fa;
+  border: 2rpx solid #e9ecef;
+  font-size: 26rpx;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.limit-item.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+  font-weight: 600;
+}
+
+/* 预览按钮 */
+.btn-preview {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  text-align: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(102,126,234,0.4);
+}
+
+.btn-preview:active {
+  opacity: 0.85;
+}
+
+/* 错误提示 */
+.error-card {
+  background: #fff5f5;
+  border: 2rpx solid #fc8181;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  color: #c53030;
+  font-size: 26rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 加载中 */
+.loading-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  gap: 16rpx;
+  color: #666;
+  font-size: 26rpx;
+}
+
+.loading-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid #e9ecef;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 结果区域 */
+.result-section {
+  margin-top: 10rpx;
+}
+
+/* 事件卡片 */
+.event-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+  border-left: 6rpx solid #667eea;
+}
+
+.event-card.card-even {
+  border-left-color: #667eea;
+}
+
+.event-card.card-odd {
+  border-left-color: #48bb78;
+}
+
+.event-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+
+.event-date {
+  font-size: 24rpx;
+  color: #999;
+  background: #f8f9fa;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.event-countdown {
+  font-size: 24rpx;
+  font-weight: 600;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.event-countdown.future {
+  background: #e6fffa;
+  color: #234e52;
+}
+
+.event-countdown.today {
+  background: #fefcbf;
+  color: #744210;
+}
+
+.event-countdown.past {
+  background: #fff5f5;
+  color: #c53030;
+}
+
+.event-summary {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+  line-height: 1.5;
+}
+
+.event-source {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 订阅按钮 */
+.btn-subscribe {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-top: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(72,187,120,0.4);
+}
+
+.btn-subscribe:active {
+  opacity: 0.85;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+  color: #ccc;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  color: #999;
+}

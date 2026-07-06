@@ -1,0 +1,89 @@
+<view class="container">
+  <!-- 头部 -->
+  <view class="header-card">
+    <view class="title">👁️ 预览事件</view>
+    <view class="subtitle">选择订阅源，预览即将到来的事件</view>
+  </view>
+
+  <!-- 订阅源选择 -->
+  <view class="section">
+    <view class="section-title">📂 选择订阅源</view>
+    <view class="source-list">
+      <view
+        wx:for="{{sources}}"
+        wx:key="*this"
+        class="source-item {{checkedSources.indexOf(item) > -1 ? 'active' : ''}}"
+        bindtap="onSourceChange"
+        data-idx="{{index}}"
+      >
+        <view class="check-box {{checkedSources.indexOf(item) > -1 ? 'checked' : ''}}">
+          <text wx:if="{{checkedSources.indexOf(item) > -1}}">✓</text>
+        </view>
+        <text>{{sourceLabels[item]}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数量选择 -->
+  <view class="section">
+    <view class="section-title">🔢 预览数量</view>
+    <view class="limit-list">
+      <view
+        wx:for="{{limitOptions}}"
+        wx:key="*this"
+        class="limit-item {{limit === item ? 'active' : ''}}"
+        bindtap="onLimitChange"
+        data-idx="{{index}}"
+      >
+        {{item}} 条
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载按钮 -->
+  <view class="btn-preview" bindtap="loadPreview">
+    🔍 加载预览
+  </view>
+
+  <!-- 错误提示 -->
+  <view wx:if="{{error}}" class="error-card">
+    ⚠️ {{error}}
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-card">
+    <view class="loading-spinner"></view>
+    <text>加载中...</text>
+  </view>
+
+  <!-- 事件列表 -->
+  <view wx:if="{{events.length > 0 && !loading}}" class="result-section">
+    <view class="section-title">📅 即将到来的事件（{{events.length}} 条）</view>
+
+    <view
+      wx:for="{{events}}"
+      wx:key="index"
+      class="event-card {{index % 2 === 0 ? 'card-even' : 'card-odd'}}"
+    >
+      <view class="event-header">
+        <view class="event-date">{{item.date}}</view>
+        <view class="event-countdown {{item.diffDays < 0 ? 'past' : (item.diffDays === 0 ? 'today' : 'future')}}">
+          {{item.daysText}}
+        </view>
+      </view>
+      <view class="event-summary">{{item.summary}}</view>
+      <view class="event-source">来源：{{item.source}}</view>
+    </view>
+
+    <!-- 订阅按钮 -->
+    <view class="btn-subscribe" bindtap="copySubscribeUrl">
+      📋 复制订阅链接
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{!loading && events.length === 0 && !error}}" class="empty-state">
+    <view class="empty-icon">📅</view>
+    <view class="empty-text">选择订阅源并点击"加载预览"</view>
+  </view>
+</view>

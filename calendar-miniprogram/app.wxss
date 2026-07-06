@@ -271,6 +271,18 @@ page {
   margin-right: 6rpx;
 }
 
+/* 预览入口 */
+.preview-banner {
+  background: linear-gradient(135deg, #e7f0ff 0%, #dbeafe 100%);
+  border: 2rpx solid #667eea;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 20rpx;
+  font-size: 24rpx;
+  color: #667eea;
+  font-weight: 600;
+}
+
 /* CF Workers 入口提示 */
 .workers-banner {
   background: #fff3cd;

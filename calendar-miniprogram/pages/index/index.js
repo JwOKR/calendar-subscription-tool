@@ -55,6 +55,10 @@ Page({
     wx.navigateTo({ url: '/pages/tutorial/tutorial' });
   },
 
+  goPreview() {
+    wx.navigateTo({ url: '/pages/preview/preview' });
+  },
+
   goCustomize() {
     wx.navigateTo({ url: '/pages/customize/customize' });
   },
