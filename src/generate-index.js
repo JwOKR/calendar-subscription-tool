@@ -493,8 +493,10 @@ const html = `<!DOCTYPE html>
         }
 
         function updateSubscriptionUrls() {
-            // 确定要使用的数据属性
-            const iconKey = protocolMode === 'webcal' ? 'webcal-' + iconMode : iconMode;
+            // 确定要使用的数据属性（dataset 属性名是 camelCase）
+            const iconKey = protocolMode === 'webcal'
+                ? 'webcal' + iconMode.charAt(0).toUpperCase() + iconMode.slice(1)
+                : iconMode;
 
             // 更新所有卡片的显示
             document.querySelectorAll('.subscription-url').forEach(el => {
