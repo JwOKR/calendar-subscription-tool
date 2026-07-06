@@ -117,7 +117,7 @@
         <!-- 头部 -->
         <div class="header-card">
             <h1>📅 日历订阅源</h1>
-            <div class="update-time"><span class="pulse-dot"></span>🤖 自动更新 · 每天北京时间凌晨 2 点 · 最后生成: 2026-07-06 02:35:57 UTC</div>
+            <div class="update-time"><span class="pulse-dot"></span>🤖 自动更新 · 每天北京时间凌晨 2 点 · 最后生成: 2026-07-06 02:39:07 UTC</div>
             <div style="margin-top:12px;">
                 <span class="year-range-badge">📅 覆盖年份：2021 - 2028</span>
             </div>
@@ -477,8 +477,10 @@
         }
 
         function updateSubscriptionUrls() {
-            // 确定要使用的数据属性
-            const iconKey = protocolMode === 'webcal' ? 'webcal-' + iconMode : iconMode;
+            // 确定要使用的数据属性（dataset 属性名是 camelCase）
+            const iconKey = protocolMode === 'webcal'
+                ? 'webcal' + iconMode.charAt(0).toUpperCase() + iconMode.slice(1)
+                : iconMode;
 
             // 更新所有卡片的显示
             document.querySelectorAll('.subscription-url').forEach(el => {
