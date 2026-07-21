@@ -2,9 +2,6 @@
 
 将这些 .ics 文件导入你的日历应用即可订阅：
 
-  📅 china-holidays.ics
-     中国节假日·调休 — 导入后显示法定节假日和调休上班日
-
   📅 lunar-calendar.ics
      农历日期 — 每月初一及农历节日提醒
 
@@ -15,9 +12,6 @@
      每日宜忌 — 每日老黄历宜忌（事件较多，可选导入）
 
   📅 festivals.ics
-     
-
-  📅 china-holidays-noicon.ics
      
 
   📅 lunar-calendar-noicon.ics
